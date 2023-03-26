@@ -16,13 +16,16 @@ import util
 NAME = util.getNameFromFile(__file__)
 
 
+####################################################################################################
+
+
 class Board(GridLayout, util.Helper):
     def __init__(self):
         super(Board, self).__init__()
+        Logger.info(f"{NAME}: init Board()")
+        self.size_hint = [1.0, None]
         self.cols = self.data['board']['size']
         self.buttons = self.getAndAddButtons()
-        self.data['board']['button_objs'] = self.buttons
-        self.size_hint = [1.0, None]
         self.bind(pos=self.updateCanvas, size=self.updateCanvas)
 
     def updateCanvas(self, *args) -> None:
@@ -42,11 +45,13 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
     def __init__(self, coord:list[int]):
         super(BoardButton, self).__init__()
         self.coord = coord
+        self.cur_stone = 'no'
+        self.size_hint = [1.0, 1 / self.data['board']['size']]
         self.hor_line_type = self.getHorLineType()
         self.vert_line_type = self.getVertLineType()
         self.is_star = self.getIsStar()
         self.setAndAddCanvasBeforeObjs()
-        self.size_hint = [1.0, 1 / self.data['board']['size']]
+        self.setAndAddCanvasAfterObjs()
         self.bind(pos=self.updateCanvas, size=self.updateCanvas)
 
     def setAndAddCanvasBeforeObjs(self) -> None:
@@ -59,12 +64,22 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
             self.vert_line = Line()
             self.star = self.getStar()
 
+    def setAndAddCanvasAfterObjs(self) -> None:
+        with self.canvas.after:
+            self.stone_color = Color(*util.NOTHING)
+            self.stone = Ellipse()
+            self.stone_line_color = Color(*util.NOTHING)
+            self.stone_line = Line()
+
     def updateCanvas(self, *args) -> None:
         self.rect.pos = self.pos
         self.rect.size = self.size
         self.hor_line.points = self.getHorLinePoints()
         self.vert_line.points = self.getVertLinePoints()
         if self.is_star:  self.star.pos = self.getStarPos()
+        self.stone.pos = self.pos
+        self.stone.size = self.size
+        self.stone_line.circle = self.getStoneLineCircleArgs()
 
     def getHorLineType(self) -> str:
         if self.coord[1] == 0:  return 'left'
@@ -82,22 +97,25 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
     def getStar(self) -> Ellipse:
         return Ellipse(size=[self.data['board']['grid']['star_size']] * 2) if self.is_star else None
 
-    def getHorLinePoints(self) -> list[int]:
+    def getHorLinePoints(self) -> list[float]:
         line_type, pos_x, pos_y, size_x, size_y = self.hor_line_type, *self.rect.pos, *self.rect.size
         x1 = pos_x if line_type in ['center', 'right'] else (pos_x + (size_x / 2))
         x2 = (pos_x + size_x) if line_type in ['left', 'center'] else (pos_x + (size_x / 2))
         y1, y2 = [pos_y + (size_y / 2)] * 2
         return [x1, y1, x2, y2]
 
-    def getVertLinePoints(self) -> list[int]:
+    def getVertLinePoints(self) -> list[float]:
         line_type, pos_x, pos_y, size_x, size_y = self.vert_line_type, *self.rect.pos, *self.rect.size
         y1 = (pos_y + size_y) if line_type in ['center', 'bottom'] else (pos_y + (size_y / 2))
         y2 = pos_y if line_type in ['top', 'center'] else (pos_y + (size_y / 2))
         x1, x2 = [pos_x + (size_x / 2)] * 2
         return [x1, y1, x2, y2]
 
-    def getStarPos(self) -> list[int]:
+    def getStarPos(self) -> list[float]:
         return [(self.pos[i] + (self.size[i] / 2)) - (self.star.size[i] / 2) for i in [0, 1]]
+
+    def getStoneLineCircleArgs(self) -> list[float]:
+        return [self.center_x, self.center_y, self.width / 2]
 
     def on_release(self) -> None:
         print(f"{self.coord = }")

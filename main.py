@@ -20,6 +20,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.splitter import Splitter
 
 import util
+from ui.menu import BoardOptions
 from ui.board import Board
 
 
@@ -52,11 +53,11 @@ def main() -> None:
 
     util.updateLogger()
 
-    Logger.info(f"{NAME}: start '{util.PROJECT_NAME}'")
+    Logger.info(f"{NAME}: start {util.PROJECT_NAME}")
 
     MainApp().run()
 
-    Logger.info(f"{NAME}: end '{util.PROJECT_NAME}'\n")
+    Logger.info(f"{NAME}: end {util.PROJECT_NAME}\n")
 
 
 ####################################################################################################
@@ -93,6 +94,7 @@ class MainApp(App):
 class MainWindow(BoxLayout, util.Helper):
     def __init__(self):
         super(MainWindow, self).__init__()
+        Logger.info(f"{NAME}: init MainWindow()")
         self.orientation = 'vertical'
         self.main_scroll = MainScroll()
         self.add_widget(self.main_scroll)
@@ -101,9 +103,37 @@ class MainWindow(BoxLayout, util.Helper):
 class MainScroll(ScrollView, util.Helper):
     def __init__(self):
         super(MainScroll, self).__init__()
-        self.do_scroll_x = False
+        Logger.info(f"{NAME}: init MainScroll()")
+        # self.do_scroll_x = False
+
+        self.size_hint = [1.0, None]
+        self.size = [Window.width, Window.height]
+
+        self.box_layout = BoxLayout()
+        self.box_layout.size_hint = [1.0, None]
+        self.box_layout.orientation = 'vertical'
+        self.box_layout.bind(minimum_height=self.box_layout.setter('height'))  # \_(**)_/
+        self.add_widget(self.box_layout)
+
+        # self.board_options = BoardOptions()
+        # self.add_widget(self.board_options)
+        # self.box_layout.add_widget(self.board_options)
+
+        from kivy.uix.button import Button
+
+        for i in range(3):
+            self.box_layout.add_widget(Button(size_hint=[1.0, None], height=40))
+
         self.board = Board()
-        self.add_widget(self.board)
+        # self.add_widget(self.board)
+        self.box_layout.add_widget(self.board)
+
+        # self.button_1 = Button()
+        # self.button_1.size_hint = [1.0, None]
+        # self.button_1.height = 20
+        # self.board_options.add_widget(self.button_1)
+
+
 
 
 ####################################################################################################

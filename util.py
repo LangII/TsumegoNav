@@ -1,9 +1,11 @@
 
 
 import logging
+from typing import Any
+import json
 
-from kivy.logger import Logger, ColoredFormatter
 from kivy.app import App
+from kivy.logger import Logger, ColoredFormatter
 
 
 ####################################################################################################
@@ -36,3 +38,7 @@ def updateLogger() -> None:
 def getNameFromFile(file:str) -> str:
     return file[(file.rfind(PROJECT_NAME) + len(PROJECT_NAME) + 1):file.rfind('.')]
 
+
+def prettyPrint(var_name: str, obj: Any) -> None:
+    default = lambda x: str(x) or x.__repr__()
+    print(f"\n{var_name} = {json.dumps(obj, indent=4, default=default)}\n")
