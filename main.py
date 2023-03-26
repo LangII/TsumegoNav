@@ -82,11 +82,16 @@ class MainApp(App):
         if text == ' ':  self.spaceBarInput()
 
     def spaceBarInput(self) -> None:
-        print(f"\n{self.data = }\n")
-        for k, button in self.data['board']['buttons'].items():
-            print(f"{k = }")
-            print(f"{button.pos = }")
-            print(f"{button.size = }\n")
+        # print(f"\n{self.data = }\n")
+        # for k, button in self.data['board']['buttons'].items():
+        #     print(f"{k = }")
+        #     print(f"{button.pos = }")
+        #     print(f"{button.size = }\n")
+
+        print(f"\n{self.main_window.pos = }")
+        print(f"{self.main_window.size = }")
+        print(f"{self.main_window.main_scroll.pos = }")
+        print(f"{self.main_window.main_scroll.size = }")
 
     #####  /\  IN APP TESTING
 
@@ -96,8 +101,14 @@ class MainWindow(BoxLayout, util.Helper):
         super(MainWindow, self).__init__()
         Logger.info(f"{NAME}: init MainWindow()")
         self.orientation = 'vertical'
+
+        from kivy.uix.button import Button
+        self.add_widget(Button(size_hint=[1.0, None], height=10))
+
         self.main_scroll = MainScroll()
         self.add_widget(self.main_scroll)
+
+        self.bind(pos=self.main_scroll.binding, size=self.main_scroll.binding)  # YES!!!  fixed it
 
 
 class MainScroll(ScrollView, util.Helper):
@@ -107,12 +118,24 @@ class MainScroll(ScrollView, util.Helper):
         # self.do_scroll_x = False
 
         self.size_hint = [1.0, None]
+
         self.size = [Window.width, Window.height]
+        # self.height = Window.height
+
 
         self.box_layout = BoxLayout()
         self.box_layout.size_hint = [1.0, None]
+
+        # self.box_layout.pos_hint = {'top': 0}
+
+        # self.box_layout.pos_hint = {'top': 1.0}
+
         self.box_layout.orientation = 'vertical'
+
         self.box_layout.bind(minimum_height=self.box_layout.setter('height'))  # \_(**)_/
+
+        # self.box_layout.height = self.minimum_height
+
         self.add_widget(self.box_layout)
 
         # self.board_options = BoardOptions()
@@ -121,7 +144,7 @@ class MainScroll(ScrollView, util.Helper):
 
         from kivy.uix.button import Button
 
-        for i in range(3):
+        for i in range(8):
             self.box_layout.add_widget(Button(size_hint=[1.0, None], height=40))
 
         self.board = Board()
@@ -132,6 +155,13 @@ class MainScroll(ScrollView, util.Helper):
         # self.button_1.size_hint = [1.0, None]
         # self.button_1.height = 20
         # self.board_options.add_widget(self.button_1)
+
+        # self.parent.bind(pos=self.tryingToFixThis, size=self.tryingToFixThis)
+
+    def binding(self, *args):
+        self.pos = self.parent.pos
+        self.size = self.parent.size
+        # print("asdf")
 
 
 
