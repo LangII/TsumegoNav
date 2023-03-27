@@ -25,10 +25,11 @@ class Board(GridLayout, util.Helper):
         Logger.info(f"{NAME}: init Board()")
         self.size_hint = [1.0, None]
         self.cols = self.data['board']['size']
+        self.padding = util.PAD_V_MAIN_BOTTOM
         self.buttons = self.getAndAddButtons()
-        self.bind(pos=self.updateCanvas, size=self.updateCanvas)
+        self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
-    def updateCanvas(self, *args) -> None:
+    def updateDisplay(self, *args) -> None:
         self.size = [self.parent.width] * 2
 
     def getAndAddButtons(self) -> dict:
@@ -52,26 +53,26 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
         self.is_star = self.getIsStar()
         self.setAndAddCanvasBeforeObjs()
         self.setAndAddCanvasAfterObjs()
-        self.bind(pos=self.updateCanvas, size=self.updateCanvas)
+        self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
-            self.rect_color = Color(*util.BOARD_YELLOW)
+            self.rect_color = Color(*util.CLR_BOARD_YELLOW)
             self.rect = Rectangle()
-            self.hor_line_color = Color(*util.BLACK)
+            self.hor_line_color = Color(*util.CLR_BLACK)
             self.hor_line = Line()
-            self.vert_line_color = Color(*util.BLACK)
+            self.vert_line_color = Color(*util.CLR_BLACK)
             self.vert_line = Line()
             self.star = self.getStar()
 
     def setAndAddCanvasAfterObjs(self) -> None:
         with self.canvas.after:
-            self.stone_color = Color(*util.NOTHING)
+            self.stone_color = Color(*util.CLR_NOTHING)
             self.stone = Ellipse()
-            self.stone_line_color = Color(*util.NOTHING)
+            self.stone_line_color = Color(*util.CLR_NOTHING)
             self.stone_line = Line()
 
-    def updateCanvas(self, *args) -> None:
+    def updateDisplay(self, *args) -> None:
         self.rect.pos = self.pos
         self.rect.size = self.size
         self.hor_line.points = self.getHorLinePoints()

@@ -41,7 +41,9 @@ DATA = {
                 [3, 3], [3, 9], [3, 15], [9, 3], [9, 9], [9, 15], [15, 3], [15, 9], [15, 15],
             ],
         },
-        'button_objs': [],
+    },
+    'input': {
+
     },
 }
 
@@ -69,7 +71,7 @@ class MainApp(App):
         self.data = DATA
         self.main_window = None
         Window.size = self.data['window']['size_default']
-        Window.clearcolor = util.PRISMARINE
+        Window.clearcolor = util.CLR_PRISMARINE
         Window.bind(on_key_down=self.keyboardInput)
 
     def build(self):
@@ -82,16 +84,13 @@ class MainApp(App):
         if text == ' ':  self.spaceBarInput()
 
     def spaceBarInput(self) -> None:
-        # print(f"\n{self.data = }\n")
-        # for k, button in self.data['board']['buttons'].items():
-        #     print(f"{k = }")
-        #     print(f"{button.pos = }")
-        #     print(f"{button.size = }\n")
 
-        print(f"\n{self.main_window.pos = }")
-        print(f"{self.main_window.size = }")
-        print(f"{self.main_window.main_scroll.pos = }")
-        print(f"{self.main_window.main_scroll.size = }")
+        board_options = self.main_window.main_scroll.main_scroll_layout.board_options
+        print(f"\n{board_options.padding = }")
+        print(f"{board_options.pos = }")
+        print(f"{board_options.size = }")
+        print(f"{board_options.rect.pos = }")
+        print(f"{board_options.rect.size = }\n")
 
     #####  /\  IN APP TESTING
 
@@ -99,70 +98,45 @@ class MainApp(App):
 class MainWindow(BoxLayout, util.Helper):
     def __init__(self):
         super(MainWindow, self).__init__()
-        Logger.info(f"{NAME}: init MainWindow()")
+        Logger.info(f"{NAME}: init MainWindow")
         self.orientation = 'vertical'
-
-        from kivy.uix.button import Button
-        self.add_widget(Button(size_hint=[1.0, None], height=10))
-
         self.main_scroll = MainScroll()
         self.add_widget(self.main_scroll)
 
-        self.bind(pos=self.main_scroll.binding, size=self.main_scroll.binding)  # YES!!!  fixed it
+        # Fixes problem where content does not stay at top of scroll during window resizing.
+        self.bind(pos=self.main_scroll.updateDisplay, size=self.main_scroll.updateDisplay)
 
 
 class MainScroll(ScrollView, util.Helper):
     def __init__(self):
         super(MainScroll, self).__init__()
-        Logger.info(f"{NAME}: init MainScroll()")
-        # self.do_scroll_x = False
-
+        Logger.info(f"{NAME}: init MainScroll")
         self.size_hint = [1.0, None]
-
         self.size = [Window.width, Window.height]
-        # self.height = Window.height
+        self.main_scroll_layout = MainScrollLayout()
+        self.add_widget(self.main_scroll_layout)
+
+    def updateDisplay(self, *args):
+        # See note for MainWindow.bind().
+        self.pos, self.size = self.parent.pos, self.parent.size
 
 
-        self.box_layout = BoxLayout()
-        self.box_layout.size_hint = [1.0, None]
+class MainScrollLayout(BoxLayout, util.Helper):
+    def __init__(self):
+        super(MainScrollLayout, self).__init__()
+        Logger.info(f"{NAME}: init MainScrollLayout")
+        self.size_hint = [1.0, None]
+        self.orientation = 'vertical'
+        self.spacing = util.SPC_MAIN
 
-        # self.box_layout.pos_hint = {'top': 0}
-
-        # self.box_layout.pos_hint = {'top': 1.0}
-
-        self.box_layout.orientation = 'vertical'
-
-        self.box_layout.bind(minimum_height=self.box_layout.setter('height'))  # \_(**)_/
-
-        # self.box_layout.height = self.minimum_height
-
-        self.add_widget(self.box_layout)
-
-        # self.board_options = BoardOptions()
-        # self.add_widget(self.board_options)
-        # self.box_layout.add_widget(self.board_options)
-
-        from kivy.uix.button import Button
-
-        for i in range(8):
-            self.box_layout.add_widget(Button(size_hint=[1.0, None], height=40))
+        self.board_options = BoardOptions()
+        self.add_widget(self.board_options)
 
         self.board = Board()
-        # self.add_widget(self.board)
-        self.box_layout.add_widget(self.board)
+        self.add_widget(self.board)
 
-        # self.button_1 = Button()
-        # self.button_1.size_hint = [1.0, None]
-        # self.button_1.height = 20
-        # self.board_options.add_widget(self.button_1)
-
-        # self.parent.bind(pos=self.tryingToFixThis, size=self.tryingToFixThis)
-
-    def binding(self, *args):
-        self.pos = self.parent.pos
-        self.size = self.parent.size
-        # print("asdf")
-
+        # Not sure why this is needed, but the example in the docs has it.  \_(**)_/
+        self.bind(minimum_height=self.setter('height'))
 
 
 

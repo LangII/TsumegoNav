@@ -15,11 +15,24 @@ PROJECT_NAME = __file__.split('/')[-2]
 
 LOG_FORMAT = '[%(asctime)s] [%(levelname)-18s] %(message)s'
 
-PRISMARINE =    [0.00, 0.40, 0.40, 1.00]
-BOARD_YELLOW =  [0.85, 0.60, 0.00, 1.00]
-BLACK =         [0.00, 0.00, 0.00, 1.00]
-WHITE =         [1.00, 1.00, 1.00, 1.00]
-NOTHING =       [0.00, 0.00, 0.00, 0.00]
+CLR_BLACK =             [0.00, 0.00, 0.00, 1.00]
+CLR_WHITE =             [1.00, 1.00, 1.00, 1.00]
+CLR_NOTHING =           [0.00, 0.00, 0.00, 0.00]
+CLR_BOARD_YELLOW =      [0.85, 0.60, 0.00, 1.00]
+CLR_PRISMARINE =        [0.00, 0.40, 0.40, 1.00]
+CLR_DARK_PRISMARINE =   [0.00, 0.30, 0.30, 1.00]
+
+PAD_MAIN = 8
+# [left, top, right, bottom]
+PAD_V_MAIN_TOP =    [PAD_MAIN, PAD_MAIN, PAD_MAIN,        0]
+PAD_V_MAIN_MID =    [PAD_MAIN, 0,        PAD_MAIN,        0]
+PAD_V_MAIN_BOTTOM = [PAD_MAIN, 0,        PAD_MAIN, PAD_MAIN]
+PAD_H_MAIN_LEFT =   [PAD_MAIN, PAD_MAIN, 0,        PAD_MAIN]
+PAD_H_MAIN_MID =    [0,        PAD_MAIN, 0,        PAD_MAIN]
+PAD_H_MAIN_RIGHT =  [0,        PAD_MAIN, PAD_MAIN, PAD_MAIN]
+PAD_MAIN_ALL =      [PAD_MAIN, PAD_MAIN, PAD_MAIN, PAD_MAIN]
+
+SPC_MAIN = 8
 
 
 ####################################################################################################
