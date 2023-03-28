@@ -69,6 +69,7 @@ class MainApp(App):
     def __init__(self, **kwargs):
         super(MainApp, self).__init__(**kwargs)
         self.data = DATA
+        self.title = util.PROJECT_NAME
         self.main_window = None
         Window.size = self.data['window']['size_default']
         Window.clearcolor = util.CLR_PRISMARINE
