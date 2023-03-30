@@ -85,13 +85,17 @@ class MainApp(App):
         if text == ' ':  self.spaceBarInput()
 
     def spaceBarInput(self) -> None:
+        print("")
+        print(f"{Window.mouse_pos = }")
 
         board_options = self.main_window.main_scroll.main_scroll_layout.board_options
-        print(f"\n{board_options.padding = }")
+        print("")
+        print(f"{board_options.padding = }")
         print(f"{board_options.pos = }")
         print(f"{board_options.size = }")
         print(f"{board_options.rect.pos = }")
         print(f"{board_options.rect.size = }\n")
+
 
     #####  /\  IN APP TESTING
 

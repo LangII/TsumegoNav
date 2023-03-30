@@ -8,7 +8,11 @@ class BoardOptions(BoxLayout, util.Helper):
     def __init__(self):
         super(BoardOptions, self).__init__()
         self.orientation = 'horizontal'
+
         self.size_hint = [1.0, None]
+        # self.size_hint = [None, None]
+        # self.size_hint = [1.0, 1.0]
+
         self.height = 80
         self.padding_outer = util.PAD_V_MAIN_TOP
         self.padding_inner = util.PAD_MAIN_ALL
@@ -41,8 +45,13 @@ class BoardOptions(BoxLayout, util.Helper):
         # self.button_3 = Button()
         # self.add_widget(self.button_3)
 
+
+
         self.updateDisplay()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
+
+    # def getWidth(self) -> float:
+    #     return (self.button_1.height * 2) + (util.SPC_MAIN * 5)
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
@@ -82,6 +91,8 @@ class BoardOptions(BoxLayout, util.Helper):
 
         self.button_1.width = self.button_1.height
 
+        # self.width = self.getWidth()
+
         # self.rect.pos = self.pos
         # self.rect.size = self.size
 
@@ -100,15 +111,23 @@ class CurNextStoneOptions(BoxLayout, util.Helper):
 
         self.size_hint = [None, 1.0]
         self.setAndAddCanvasBeforeObjs()
-        self.updateDisplay()
-        self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
         from kivy.uix.button import Button
 
         self.button_1 = Button()
+        self.button_1.size_hint = [None, 1.0]
         self.add_widget(self.button_1)
         self.button_2 = Button()
+        self.button_2.size_hint = [None, 1.0]
         self.add_widget(self.button_2)
+
+        self.width = self.getWidth()
+
+        self.updateDisplay()
+        self.bind(pos=self.updateDisplay, size=self.updateDisplay)
+
+    def getWidth(self) -> float:
+        return (self.button_1.height * 2) + (util.SPC_MAIN * 3)
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
@@ -118,6 +137,10 @@ class CurNextStoneOptions(BoxLayout, util.Helper):
     def updateDisplay(self, *args) -> None:
         self.rect.pos = self.pos
         self.rect.size = self.size
+        self.button_1.width = self.button_1.height
+        self.button_2.width = self.button_2.height
+
+        self.width = self.getWidth()
 
 
 
