@@ -43,7 +43,11 @@ DATA = {
         },
     },
     'input': {
-
+        'board_options': {
+            'cur_stone': 'black',  # 'black' or 'white'
+            'next_stone': 'white',  # 'black' or 'white'
+            'next_stone_state': 'alternate',  # 'alternate' or 'consecutive'
+        },
     },
 }
 

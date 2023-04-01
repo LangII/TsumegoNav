@@ -1,57 +1,39 @@
 
+
+from kivy.logger import Logger
+from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
-from kivy.graphics import Color, Rectangle
+from kivy.uix.button import ButtonBehavior
+from kivy.graphics import Color, Rectangle, Ellipse, Line
 
 import util
+
+
+####################################################################################################
+
+
+NAME = util.getNameFromFile(__file__)
+
+
+####################################################################################################
+
 
 class BoardOptions(BoxLayout, util.Helper):
     def __init__(self):
         super(BoardOptions, self).__init__()
+        Logger.info(f"{NAME}: init BoardOptions")
         self.orientation = 'horizontal'
-
         self.size_hint = [1.0, None]
-        # self.size_hint = [None, None]
-        # self.size_hint = [1.0, 1.0]
-
         self.height = 80
         self.padding_outer = util.PAD_V_MAIN_TOP
         self.padding_inner = util.PAD_MAIN_ALL
         self.padding = [self.padding_outer[i] + self.padding_inner[i] for i in range(4)]
         self.spacing = util.SPC_MAIN
         self.setAndAddCanvasBeforeObjs()
-
-        from kivy.uix.button import Button
-
         self.cur_next_stone_options = CurNextStoneOptions()
         self.add_widget(self.cur_next_stone_options)
-
-
-
-        self.button_1 = Button()
-        self.button_1.size_hint = [None, 1.0]
-        # self.button_1.width = self.button_1.height
-        # self.button_1.width = 40
-        # self.button_1.height = 40
-        # self.button_1.padding = util.PAD_H_MAIN_LEFT
-        # self.button_1.size = [200, 200]
-        self.add_widget(self.button_1)
-
-        # self.button_2 = Button()
-        # self.button_2.size_hint = [None, 1.0]
-        # self.button_2.width = self.button_2.height
-        # self.button_2.padding = util.PAD_H_MAIN_MID
-        # self.add_widget(self.button_2)
-
-        # self.button_3 = Button()
-        # self.add_widget(self.button_3)
-
-
-
         self.updateDisplay()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
-
-    # def getWidth(self) -> float:
-    #     return (self.button_1.height * 2) + (util.SPC_MAIN * 5)
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
@@ -59,27 +41,6 @@ class BoardOptions(BoxLayout, util.Helper):
             self.rect = Rectangle()
 
     def updateDisplay(self, *args) -> None:
-
-
-        """
-        TURNOVER NOTES:
-
-        2023-03-26
-        DONE
-        - Need to update rect.pos with pos, also considering padding.  Same for size.
-        - Also think about turning this into a util func.  I'll likely need to use this again in
-        the future.
-
-        2023-03-27
-        - Next to do:
-            - The 1st 2 buttons of Board Options will be Widgets with ButtonBehavior like
-            BoardButtons.  That way they will look like like stones.
-            - The 1st 2 buttons will also be "encased" in their own "boarder".  Just like
-            ButtonOptions got its own boarder of DARK_PRISMARINE, these 1st 2 buttons (because
-            they're related), get their own boarder encasing.  Use PRISMARINE.
-        """
-
-
         self.rect.pos = [
             self.pos[0] + self.padding_outer[0],
             self.pos[1] + self.padding_outer[3]
@@ -89,45 +50,26 @@ class BoardOptions(BoxLayout, util.Helper):
             self.size[1] - self.padding_outer[2] - self.padding_outer[3]
         ]
 
-        self.button_1.width = self.button_1.height
-
-        # self.width = self.getWidth()
-
-        # self.rect.pos = self.pos
-        # self.rect.size = self.size
-
 
 class CurNextStoneOptions(BoxLayout, util.Helper):
     def __init__(self):
         super(CurNextStoneOptions, self).__init__()
+        Logger.info(f"{NAME}: init CurNextStoneOptions")
         self.orientation = 'horizontal'
         self.spacing = util.SPC_MAIN
-
-        # self.padding_outer = util.PAD_V_MAIN_TOP
-        # self.padding_inner = util.PAD_MAIN_ALL
-        # self.padding = [self.padding_outer[i] + self.padding_inner[i] for i in range(4)]
-
         self.padding = util.PAD_MAIN_ALL
-
         self.size_hint = [None, 1.0]
         self.setAndAddCanvasBeforeObjs()
-
-        from kivy.uix.button import Button
-
-        self.button_1 = Button()
-        self.button_1.size_hint = [None, 1.0]
-        self.add_widget(self.button_1)
-        self.button_2 = Button()
-        self.button_2.size_hint = [None, 1.0]
-        self.add_widget(self.button_2)
-
+        self.cur_stone_button = CurStoneButton()
+        self.add_widget(self.cur_stone_button)
+        self.next_stone_button = NextStoneButton()
+        self.add_widget(self.next_stone_button)
         self.width = self.getWidth()
-
         self.updateDisplay()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
     def getWidth(self) -> float:
-        return (self.button_1.height * 2) + (util.SPC_MAIN * 3)
+        return (self.cur_stone_button.height * 2) + (util.SPC_MAIN * 3)
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
@@ -137,11 +79,66 @@ class CurNextStoneOptions(BoxLayout, util.Helper):
     def updateDisplay(self, *args) -> None:
         self.rect.pos = self.pos
         self.rect.size = self.size
-        self.button_1.width = self.button_1.height
-        self.button_2.width = self.button_2.height
-
+        self.cur_stone_button.width = self.cur_stone_button.height
+        self.next_stone_button.width = self.next_stone_button.height
         self.width = self.getWidth()
 
+
+class CurNextStoneButton(ButtonBehavior, Widget, util.Helper):
+    def __init__(self, option:str):
+        super(CurNextStoneButton, self).__init__()
+        self.option = option
+        with self.canvas.after:
+            self.stone_color = Color(*util.CLR_WHITE)
+            self.stone = Ellipse()
+            self.stone_line_color = Color(*util.CLR_BLACK)
+            self.stone_line = Line()
+        self.bind(pos=self.updateDisplay, size=self.updateDisplay)
+
+    def updateDisplay(self, *args) -> None:
+        self.stone.pos = self.pos
+        self.stone.size = self.size
+        self.stone_line.circle = self.getStoneLineCircleArgs()
+
+    def getStoneLineCircleArgs(self) -> list[float]:
+        return [self.center_x, self.center_y, self.width / 2]
+
+    def setColor(self, color:str) -> None:
+        self.data['input']['board_options'][self.option] = color
+        self.color = color
+        self.stone_color.rgba = util.CLR_BLACK if color == 'black' else util.CLR_WHITE
+
+    def cycleColor(self) -> None:
+        if self.color == 'black':  self.setColor('white')
+        elif self.color == 'white':  self.setColor('black')
+
+
+class CurStoneButton(CurNextStoneButton):
+    def __init__(self):
+        super(CurStoneButton, self).__init__('cur_stone')
+        Logger.info(f"{NAME}: init CurStoneButton")
+        self.setColor(self.data['input']['board_options']['cur_stone'])
+
+    def on_release(self) -> None:
+        self.cycleColor()
+        self.parent.next_stone_button.cycleColor()
+
+
+class NextStoneButton(CurNextStoneButton):
+    def __init__(self):
+        super(NextStoneButton, self).__init__('next_stone')
+        Logger.info(f"{NAME}: init NextStoneButton")
+        self.setColor(self.data['input']['board_options']['next_stone'])
+
+    def cycleNextStoneState(self) -> None:
+        if self.data['input']['board_options']['next_stone_state'] == 'alternate':
+            self.data['input']['board_options']['next_stone_state'] = 'consecutive'
+        elif self.data['input']['board_options']['next_stone_state'] == 'consecutive':
+            self.data['input']['board_options']['next_stone_state'] = 'alternate'
+
+    def on_release(self) -> None:
+        self.cycleColor()
+        self.cycleNextStoneState()
 
 
 

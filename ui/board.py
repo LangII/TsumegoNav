@@ -22,7 +22,7 @@ NAME = util.getNameFromFile(__file__)
 class Board(GridLayout, util.Helper):
     def __init__(self):
         super(Board, self).__init__()
-        Logger.info(f"{NAME}: init Board()")
+        Logger.info(f"{NAME}: init Board")
         self.size_hint = [1.0, None]
         self.cols = self.data['board']['size']
         self.padding = util.PAD_V_MAIN_BOTTOM
@@ -118,9 +118,27 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
     def getStoneLineCircleArgs(self) -> list[float]:
         return [self.center_x, self.center_y, self.width / 2]
 
-    def on_release(self) -> None:
-        print(f"{self.coord = }")
+    def setToNoStone(self) -> None:
+        self.cur_stone = 'no'
+        self.stone_color.rgba = util.CLR_NOTHING
+        self.stone_line_color.rgba = util.CLR_NOTHING
 
+    def setStoneColor(self) -> None:
+        self.cur_stone = self.data['input']['board_options']['cur_stone']
+        self.stone_color.rgba = util.CLR_BLACK if self.cur_stone == 'black' else util.CLR_WHITE
+        self.stone_line_color.rgba = util.CLR_BLACK
+
+    def cycleCurNextStoneButtons(self):
+        self.parent.parent.board_options.cur_next_stone_options.cur_stone_button.cycleColor()
+        self.parent.parent.board_options.cur_next_stone_options.next_stone_button.cycleColor()
+
+    def on_release(self) -> None:
+        if self.cur_stone == self.data['input']['board_options']['cur_stone']:
+            self.setToNoStone()
+        else:
+            self.setStoneColor()
+            if self.data['input']['board_options']['next_stone_state'] == 'alternate':
+                self.cycleCurNextStoneButtons()
 
 
 

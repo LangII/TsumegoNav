@@ -3,6 +3,7 @@
 import logging
 from typing import Any
 import json
+import sys
 
 from kivy.app import App
 from kivy.logger import Logger, ColoredFormatter
@@ -55,3 +56,15 @@ def getNameFromFile(file:str) -> str:
 def prettyPrint(var_name: str, obj: Any) -> None:
     default = lambda x: str(x) or x.__repr__()
     print(f"\n{var_name} = {json.dumps(obj, indent=4, default=default)}\n")
+
+
+def throwError(name:str, msg:str) -> None:
+    Logger.error(f"{name}: {msg}")
+    sys.exit()
+
+
+####################################################################################################
+
+
+NAME = getNameFromFile(__file__)
+
