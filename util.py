@@ -44,6 +44,9 @@ class Helper():
         self.data = App.get_running_app().data
 
 
+####################################################################################################
+
+
 def updateLogger() -> None:
     for i, formatter in zip([1, 2], [logging.Formatter, ColoredFormatter]):
         Logger.handlers[i].setFormatter(formatter(LOG_FORMAT))
@@ -61,6 +64,11 @@ def prettyPrint(var_name: str, obj: Any) -> None:
 def throwError(name:str, msg:str) -> None:
     Logger.error(f"{name}: {msg}")
     sys.exit()
+
+
+def convStrListCoordToListCoord(str_list_coord:str) -> list[int]:
+    for char in list('[ ]'):  str_list_coord = str_list_coord.replace(char, '')
+    return [int(x) for x in str_list_coord.split(',')]
 
 
 ####################################################################################################
