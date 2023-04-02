@@ -20,8 +20,8 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.splitter import Splitter
 
 import util
-from ui.menu import BoardOptions
-from ui.board import Board
+from front.menu import BoardOptions
+from front.board import Board
 
 
 ####################################################################################################
