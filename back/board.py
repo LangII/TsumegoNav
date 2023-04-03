@@ -2,7 +2,7 @@
 
 import sys
 new_path = __file__
-for _ in range(2):  new_path = new_path.rfind('/')
+for _ in range(2):  new_path = new_path[:new_path.rfind('/')]
 sys.path += [new_path]
 
 import util
@@ -34,7 +34,7 @@ def main():
     # })
     board.resetBoard({
         'b': [[2, 3], [3, 3], [3, 4], [3, 5], [3, 6], [4, 6], [6, 3], [7, 3], [6, 4], [3, 1]],
-        'w': [],
+        'w': [[3, 2], [2, 2], [1, 2], [4, 2], [6, 2], [7, 2]],
     })
 
     board.printBoard()
@@ -42,6 +42,22 @@ def main():
 
     board.setGroups()
     print(f"\n{board.groups = }")
+
+    for group in board.groups['b']:
+        print("")
+        print(f"{group = }")
+        print(f"{group.neighbors = }")
+        print(f"{group.neighbors_count = }")
+        print(f"{group.liberties = }")
+        print(f"{group.liberties_count = }")
+
+    # for y, x in board.groups['b'][2].neighbors:
+    #     board.board[y][x] = 'N'
+    # board.printBoard()
+
+    board.play('w', [6, 5])
+
+    board.printBoard()
 
 
 ####################################################################################################
@@ -62,6 +78,7 @@ class Board():
         self.no_char = settings['no_char']
         self.board = []
         self.stones = {'b': [], 'w': []}
+        self.groups = {'b': [], 'w': []}
         self.resetBoard()
 
     def printBoard(self) -> None:
@@ -75,6 +92,21 @@ class Board():
             char = self.black_char if color.lower() == 'b' else self.white_char
             for y, x in presets:  self.board[y][x] = char
         self.setStones()
+        self.setGroups()
+
+    def play(self, color:str, coord:list[int]) -> None:
+        self.board[coord[0]][coord[1]] = self.black_char if color == 'b' else self.white_char
+        self.setStones()
+        self.setGroups()
+
+
+
+        """
+        TURNOVER NOTES:
+        - Next to do is build 'playIsLegal()'.  Then do captures.  Then do ko.
+        """
+
+
 
     def setStones(self) -> None:
         self.stones = {'b': [], 'w': []}
@@ -127,31 +159,56 @@ class Board():
                 for i, label in enumerate(group_labels):
                     if master_label == label:
                         stones_to_group += [self.stones[color][i]]
-                self.groups[color] += [stones_to_group]
-                # self.groups[color] += [Group(stones_to_group)]
-                """
-                TURNOVER NOTES:
-                - Implement the use of Group() as a class.  ^
-                """
+                self.groups[color] += [Group(self, color, stones_to_group)]
 
-    def getStoneNeighbors(self, coord:list[int]) -> list[list[int]]:
-        if type(coord) == 'str':  coord = util.convStrListCoordToListCoord(coord)
-        y, x = coord
+    def getStoneNeighbors(self, stone:list[int]) -> list[list[int]]:
+        if type(stone) == 'str':  stone = util.convStrListCoordToListCoord(stone)
+        y, x = stone
         neighbors = [
             [y - 1, x    ] if y != 0             else None,
             [y    , x - 1] if x != 0             else None,
             [y + 1, x    ] if y != self.size - 1 else None,
             [y    , x + 1] if x != self.size - 1 else None,
         ]
-        return [n for n in neighbors if n]
-
-
+        neighbors = [n for n in neighbors if n]
+        return neighbors
 
 
 ####################################################################################################
 
 
+class Group():
+    def __init__(self, board:Board, color:str, stones:list[list[int]]):
+        self.board = board
+        self.color = color
+        self.stones = stones
+        self.neighbors = []
+        self.neighbors_count = 0
+        self.liberties = []
+        self.liberties_count = 0
+        self.setNeighborsAndCount()
+        self.setLibertiesAndCount()
 
+    def __repr__(self):
+        return f"Group('{self.color}': {self.stones})"
+
+    def setNeighborsAndCount(self) -> None:
+        neighbors = []
+        for stone in self.stones:
+            neighbors += [x for x in self.board.getStoneNeighbors(stone) if x not in self.stones]
+        no_dupes = set([str(n) for n in neighbors])
+        self.neighbors = [util.convStrListCoordToListCoord(n) for n in no_dupes]
+        self.neighbors_count = len(self.neighbors)
+
+    def setLibertiesAndCount(self) -> None:
+        """
+        NOTES:
+        - Must be called after 'setNeighborsAndCount', 'setLibertiesAndCount' is dependent on an
+        updated 'self.neighbors'.
+        """
+        other_color = 'b' if self.color == 'w' else 'w'
+        self.liberties = [n for n in self.neighbors if n not in self.board.stones[other_color]]
+        self.liberties_count = len(self.liberties)
 
 
 ####################################################################################################
