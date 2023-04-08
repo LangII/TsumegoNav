@@ -1,9 +1,13 @@
 
 
+from __future__ import annotations
+
 import sys
 new_path = __file__
 for _ in range(2):  new_path = new_path[:new_path.rfind('/')]
 sys.path += [new_path]
+
+from copy import deepcopy
 
 import util
 
@@ -12,13 +16,11 @@ import util
 
 
 SETTINGS = {
-
-    # 'size': 19,
-    'size': 9,
-
-    'black_char': '#',
+    'size': 19,
+    'black_char': 'X',
     'white_char': 'O',
     'no_char': '-',
+    'ko_char': '+',
 }
 
 
@@ -26,38 +28,8 @@ SETTINGS = {
 
 
 def main():
-    board = Board()
 
-    # board.resetBoard({
-    #     'b': [[15, 16], [ 2, 15], [16,  5]],
-    #     'w': [[15,  3], [ 3,  3]],
-    # })
-    board.resetBoard({
-        'b': [[2, 3], [3, 3], [3, 4], [3, 5], [3, 6], [4, 6], [6, 3], [7, 3], [6, 4], [3, 1]],
-        'w': [[3, 2], [2, 2], [1, 2], [4, 2], [6, 2], [7, 2]],
-    })
-
-    board.printBoard()
-    print(f"\n{board.stones = }")
-
-    board.setGroups()
-    print(f"\n{board.groups = }")
-
-    for group in board.groups['b']:
-        print("")
-        print(f"{group = }")
-        print(f"{group.neighbors = }")
-        print(f"{group.neighbors_count = }")
-        print(f"{group.liberties = }")
-        print(f"{group.liberties_count = }")
-
-    # for y, x in board.groups['b'][2].neighbors:
-    #     board.board[y][x] = 'N'
-    # board.printBoard()
-
-    board.play('w', [6, 5])
-
-    board.printBoard()
+    return
 
 
 ####################################################################################################
@@ -76,14 +48,23 @@ class Board():
         self.black_char = settings['black_char']
         self.white_char = settings['white_char']
         self.no_char = settings['no_char']
+        self.ko_char = settings['ko_char']
         self.board = []
+        self.captures = {'b': 0, 'w': 0}
+        self.ko = None
+        self.board_pos_history = []
         self.stones = {'b': [], 'w': []}
         self.groups = {'b': [], 'w': []}
         self.resetBoard()
+        self.play_data = {
+            'color': None, 'opp_color': None, 'char': None, 'opp_char': None, 'coord': None,
+            'y': None, 'x': None, 'temp_board': None, 'capturing_groups': None, 'makes_ko': None,
+        }
 
     def printBoard(self) -> None:
         print("")
         for row in self.board:  print(' '.join(row))
+        print(f"{self.captures}")
 
     def resetBoard(self, presets:dict[list[list]]=None) -> None:
         presets = presets if presets else {}
@@ -91,22 +72,75 @@ class Board():
         for color, presets in presets.items():
             char = self.black_char if color.lower() == 'b' else self.white_char
             for y, x in presets:  self.board[y][x] = char
+        self.recordBoardPos()
         self.setStones()
         self.setGroups()
 
     def play(self, color:str, coord:list[int]) -> None:
-        self.board[coord[0]][coord[1]] = self.black_char if color == 'b' else self.white_char
+        self.play_data['color'] = color
+        self.play_data['opp_color'] = 'b' if color == 'w' else 'w'
+        self.play_data['char'] = self.black_char if color == 'b' else self.white_char
+        self.play_data['opp_char'] = self.white_char if color == 'b' else self.black_char
+        self.play_data['coord'] = coord
+        self.play_data['y'], self.play_data['x'] = coord
+        if not self.playIsLegal():  self.resetPlayData()  ;  return
+        self.board[self.play_data['y']][self.play_data['x']] = self.play_data['char']
         self.setStones()
         self.setGroups()
+        self.handleCapturesDuringPlay()
+        self.handleKoDuringPlay()
+        self.recordBoardPos()
+        self.resetPlayData()
 
+    def resetPlayData(self) -> None:
+        for k in self.play_data.keys():  self.play_data[k] = None
 
+    def playIsLegal(self) -> bool:
+        # play is illegal because another stone is currently at that coord
+        if self.play_data['coord'] in self.stones['b'] + self.stones['w']:  return False
+        # play is illegal due to ko
+        if self.board[self.play_data['y']][self.play_data['x']] == self.ko_char:  return False
+        self.play_data['temp_board'] = deepcopy(self)
+        self.play_data['temp_board'].board[self.play_data['y']][self.play_data['x']] = self.play_data['char']
+        self.play_data['temp_board'].setStones()
+        self.play_data['temp_board'].setGroups()
+        self.play_data['temp_board'].handleCapturesDuringPlay()
+        # play is illegal due to suicide
+        if self.play_data['temp_board'].getGroupFromCoord(self.play_data['coord']).liberties_count == 0:  return False
+        # play is illegal due to true ko verification (board repeated)
+        if self.play_data['temp_board'].board in self.play_data['temp_board'].board_pos_history:  return False
+        return True
 
-        """
-        TURNOVER NOTES:
-        - Next to do is build 'playIsLegal()'.  Then do captures.  Then do ko.
-        """
+    def handleCapturesDuringPlay(self) -> None:
+        self.play_data['capturing_groups'] = [g for g in self.groups[self.play_data['opp_color']] if g.liberties_count == 0]
+        if self.play_data['capturing_groups']:
+            for group in self.play_data['capturing_groups']:
+                self.captures[self.play_data['color']] += len(group.stones)
+                for y, x in group.stones:  self.board[y][x] = self.no_char
+            self.setStones()
+            self.setGroups()
 
+    def handleKoDuringPlay(self) -> None:
+        self.play_data['makes_ko'] = False
+        if (
+            len(self.play_data['capturing_groups']) == 1 and
+            len(self.play_data['capturing_groups'][0].stones) == 1
+        ):
+            neighbors = self.getStoneNeighbors(self.play_data['coord'])
+            neighbors.remove(self.play_data['capturing_groups'][0].stones[0])
+            # print(f"{[self.getStoneColor(n) == self.play_data['opp_color'] for n in neighbors] = }")
+            if all([self.getStoneColor(n) == self.play_data['opp_color'] for n in neighbors]):
+                # play("!!!")
+                self.ko = self.play_data['capturing_groups'][0].stones[0]
+                self.board[self.ko[0]][self.ko[1]] = self.ko_char
+                self.play_data['makes_ko'] = True
+        # if last play was ko
+        if not self.play_data['makes_ko'] and self.ko:
+            self.board[self.ko[0]][self.ko[1]] = self.no_char
+            self.ko = None
 
+    def recordBoardPos(self) -> None:
+        self.board_pos_history += [deepcopy(self.board)]
 
     def setStones(self) -> None:
         self.stones = {'b': [], 'w': []}
@@ -172,6 +206,18 @@ class Board():
         ]
         neighbors = [n for n in neighbors if n]
         return neighbors
+
+    def getStoneColor(self, stone:list[int]) -> str:
+        y, x = stone
+        char = self.board[y][x]
+        if char == self.black_char:  color = 'b'
+        elif char == self.white_char:  color = 'w'
+        else:  color = ''
+        return color
+
+    def getGroupFromCoord(self, coord: list[int]) -> Group:
+        for group in self.groups['b'] + self.groups['w']:
+            if coord in group.stones:  return group
 
 
 ####################################################################################################
