@@ -17,11 +17,10 @@ from kivy.core.window.window_sdl2 import WindowSDL
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 
-from kivy.uix.splitter import Splitter
-
 import util
 from front.menu import BoardOptions
 from front.board import Board
+from front.tree import Tree
 
 
 ####################################################################################################
@@ -49,6 +48,10 @@ DATA = {
             'next_stone_state': 'alternate',  # 'alternate' or 'consecutive'
         },
     },
+    'back': {
+        'board_obj': None,
+        'nav_obj': None,
+    }
 }
 
 
@@ -70,8 +73,8 @@ def main() -> None:
 
 
 class MainApp(App):
-    def __init__(self, **kwargs):
-        super(MainApp, self).__init__(**kwargs)
+    def __init__(self):
+        super(MainApp, self).__init__()
         self.data = DATA
         self.title = util.PROJECT_NAME
         self.main_window = None
@@ -82,6 +85,8 @@ class MainApp(App):
     def build(self):
         self.main_window = MainWindow()
         return self.main_window
+
+
 
     #####  \/  IN APP TESTING
 
@@ -100,8 +105,8 @@ class MainApp(App):
         print(f"{board_options.rect.pos = }")
         print(f"{board_options.rect.size = }\n")
 
-
     #####  /\  IN APP TESTING
+
 
 
 class MainWindow(BoxLayout, util.Helper):
@@ -114,6 +119,21 @@ class MainWindow(BoxLayout, util.Helper):
 
         # Fixes problem where content does not stay at top of scroll during window resizing.
         self.bind(pos=self.main_scroll.updateDisplay, size=self.main_scroll.updateDisplay)
+
+
+
+        #####  \/  SETUP TESTING
+
+        presets = {
+            'b': [[2, 2], [2, 3], [2, 4], [2, 5], [1, 7],],
+            'w': [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5],]
+        }
+        for color, coords in presets.items():
+            for coord in coords:
+                self.main_scroll.main_scroll_layout.board.buttons[str(coord)].setStoneColor(color)
+
+        ##### /\  SETUP TESTING
+
 
 
 class MainScroll(ScrollView, util.Helper):
@@ -143,6 +163,9 @@ class MainScrollLayout(BoxLayout, util.Helper):
 
         self.board = Board()
         self.add_widget(self.board)
+
+        self.tree = Tree()
+        self.add_widget(self.tree)
 
         # Not sure why this is needed, but the example in the docs has it.  \_(**)_/
         self.bind(minimum_height=self.setter('height'))

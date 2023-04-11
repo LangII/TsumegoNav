@@ -1,5 +1,7 @@
 
 
+from __future__ import annotations
+
 from kivy.logger import Logger
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import ButtonBehavior, Button
@@ -8,6 +10,7 @@ from kivy.properties import ListProperty
 from kivy.graphics import Color, Line, Rectangle, Ellipse
 
 import util
+from back import board, tree
 
 
 ####################################################################################################
@@ -23,9 +26,10 @@ class Board(GridLayout, util.Helper):
     def __init__(self):
         super(Board, self).__init__()
         Logger.info(f"{NAME}: init Board")
+        self.data['back']['board'] = board.Board()
         self.size_hint = [1.0, None]
         self.cols = self.data['board']['size']
-        self.padding = util.PAD_V_MAIN_BOTTOM
+        self.padding = util.PAD_V_MAIN_MID
         self.buttons = self.getAndAddButtons()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
@@ -40,6 +44,9 @@ class Board(GridLayout, util.Helper):
             self.add_widget(button)
             buttons[str(coord)] = button
         return buttons
+
+    def getButtonByCoord(self, coord:list[int]) -> BoardButton:
+        return self.buttons[str(coord)]
 
 
 class BoardButton(ButtonBehavior, Widget, util.Helper):
@@ -118,19 +125,17 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
     def getStoneLineCircleArgs(self) -> list[float]:
         return [self.center_x, self.center_y, self.width / 2]
 
+    #####
+
     def setToNoStone(self) -> None:
         self.cur_stone = 'no'
         self.stone_color.rgba = util.CLR_NOTHING
         self.stone_line_color.rgba = util.CLR_NOTHING
 
-    def setStoneColor(self) -> None:
-        self.cur_stone = self.data['input']['board_options']['cur_stone']
-        self.stone_color.rgba = util.CLR_BLACK if self.cur_stone == 'black' else util.CLR_WHITE
+    def setStoneColor(self, color:str=None) -> None:
+        if not color:  color = self.data['input']['board_options']['cur_stone']
+        self.stone_color.rgba = util.CLR_BLACK if color in ['b', 'black'] else util.CLR_WHITE
         self.stone_line_color.rgba = util.CLR_BLACK
-
-    def cycleCurNextStoneButtons(self):
-        self.parent.parent.board_options.cur_next_stone_options.cur_stone_button.cycleColor()
-        self.parent.parent.board_options.cur_next_stone_options.next_stone_button.cycleColor()
 
     def on_release(self) -> None:
         if self.cur_stone == self.data['input']['board_options']['cur_stone']:
@@ -139,6 +144,12 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
             self.setStoneColor()
             if self.data['input']['board_options']['next_stone_state'] == 'alternate':
                 self.cycleCurNextStoneButtons()
+
+    #####
+
+    def cycleCurNextStoneButtons(self):
+        self.parent.parent.board_options.cur_next_stone_options.cur_stone_button.cycleColor()
+        self.parent.parent.board_options.cur_next_stone_options.next_stone_button.cycleColor()
 
 
 

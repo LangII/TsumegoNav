@@ -6,14 +6,17 @@ import sys
 new_path = __file__
 for _ in range(2):  new_path = new_path[:new_path.rfind('/')]
 sys.path += [new_path]
-
 from copy import deepcopy
+
+from kivy.logger import Logger
 
 import util
 
 
 ####################################################################################################
 
+
+NAME = util.getNameFromFile(__file__)
 
 SETTINGS = {
     'size': 19,
@@ -44,6 +47,7 @@ class Board():
     ending at 'self.size - 1' in the top-right.
     """
     def __init__(self, settings:dict=SETTINGS):
+        Logger.info(f"{NAME}: init Board")
         self.size = settings['size']
         self.black_char = settings['black_char']
         self.white_char = settings['white_char']
