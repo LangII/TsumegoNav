@@ -5,7 +5,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import ButtonBehavior
 from kivy.uix.widget import Widget
-from kivy.graphics import Color, Rectangle
+from kivy.graphics import Color, Rectangle, Ellipse, Line
 
 import util
 
@@ -23,8 +23,6 @@ class Tree(ScrollView, util.Helper):
     def __init__(self):
         super(Tree, self).__init__()
         Logger.info(f"{NAME}: init Tree")
-        # self.size_hint = [1.0, 1.0]
-
         self.size_hint = [1.0, None]
         self.height = 200
         self.padding = util.PAD_V_MAIN_BOTTOM
@@ -57,11 +55,90 @@ class TreeLayout(BoxLayout, util.Helper):
         Logger.info(f"{NAME}: init TreeLayout")
         self.orientation = 'vertical'
         self.spacing = 0
+        self.padding = util.PAD_MAIN_ALL
+        self.size_hint = [None, None]
 
-        self.size_hint = [1.0, 1.0]
+        #####  \/  MANUAL LEAF LAYOUT FOR TESTING
 
-        self.tree_row_layout = TreeRowLayout()
-        self.add_widget(self.tree_row_layout)
+        self.tree_row_layout_1 = TreeRowLayout()
+        self.add_widget(self.tree_row_layout_1)
+
+        self.tree_row_layout_1.root_leaf = RootLeaf()
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.root_leaf)
+
+        self.tree_row_layout_1.stone_leaf_1 = StoneLeaf('b')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_1)
+
+        self.tree_row_layout_1.stone_leaf_2 = StoneLeaf('w')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_2)
+
+        self.tree_row_layout_1.stone_leaf_3 = StoneLeaf('b')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_3)
+
+        self.tree_row_layout_1.stone_leaf_4 = StoneLeaf('w')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_4)
+
+        self.tree_row_layout_2 = TreeRowLayout()
+        self.add_widget(self.tree_row_layout_2)
+
+        self.tree_row_layout_2.branch_leaf_1 = BranchLeaf('|')
+        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.branch_leaf_1)
+
+        self.tree_row_layout_2.empty_leaf_2 = EmptyLeaf()
+        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.empty_leaf_2)
+
+        self.tree_row_layout_2.empty_leaf_3 = EmptyLeaf()
+        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.empty_leaf_3)
+
+        self.tree_row_layout_2.branch_leaf_2 = BranchLeaf('L')
+        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.branch_leaf_2)
+
+        self.tree_row_layout_2.stone_leaf_1 = StoneLeaf('w')
+        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.stone_leaf_1)
+
+        self.tree_row_layout_2.stone_leaf_2 = StoneLeaf('b')
+        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.stone_leaf_2)
+
+        self.tree_row_layout_3 = TreeRowLayout()
+        self.add_widget(self.tree_row_layout_3)
+
+        self.tree_row_layout_3.branch_leaf_1 = BranchLeaf('T')
+        self.tree_row_layout_3.add_widget(self.tree_row_layout_3.branch_leaf_1)
+
+        self.tree_row_layout_3.stone_leaf_1 = StoneLeaf('b')
+        self.tree_row_layout_3.add_widget(self.tree_row_layout_3.stone_leaf_1)
+
+        self.tree_row_layout_3.stone_leaf_2 = StoneLeaf('w')
+        self.tree_row_layout_3.add_widget(self.tree_row_layout_3.stone_leaf_2)
+
+        self.tree_row_layout_4 = TreeRowLayout()
+        self.add_widget(self.tree_row_layout_4)
+
+        self.tree_row_layout_4.branch_leaf_1 = BranchLeaf('|')
+        self.tree_row_layout_4.add_widget(self.tree_row_layout_4.branch_leaf_1)
+
+        self.tree_row_layout_4.branch_leaf_2 = BranchLeaf('L')
+        self.tree_row_layout_4.add_widget(self.tree_row_layout_4.branch_leaf_2)
+
+        self.tree_row_layout_4.stone_leaf_1 = StoneLeaf('w')
+        self.tree_row_layout_4.add_widget(self.tree_row_layout_4.stone_leaf_1)
+
+        self.tree_row_layout_5 = TreeRowLayout()
+        self.add_widget(self.tree_row_layout_5)
+
+        self.tree_row_layout_5.branch_leaf_1 = BranchLeaf('L')
+        self.tree_row_layout_5.add_widget(self.tree_row_layout_5.branch_leaf_1)
+
+        self.tree_row_layout_5.stone_leaf_1 = StoneLeaf('b')
+        self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_1)
+
+        self.tree_row_layout_5.stone_leaf_2 = StoneLeaf('w')
+        self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_2)
+
+        self.tree_row_layout_5.stone_leaf_3 = StoneLeaf('b')
+        self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_3)
+
+        #####  /\  MANUAL LEAF LAYOUT FOR TESTING
 
         # Forces children to top instead of bottom.
         self.add_widget(Widget())
@@ -72,26 +149,9 @@ class TreeRowLayout(BoxLayout, util.Helper):
         super(TreeRowLayout, self).__init__()
         self.orientation = 'horizontal'
         self.spacing = 0
-
+        self.padding = util.PAD_V_MAIN_MID
         self.size_hint = [1.0, None]
         self.height = 40
-
-        self.stone_leaf = StoneLeaf()
-        self.add_widget(self.stone_leaf)
-
-
-    #     self.setAndAddCanvasBeforeObjs()
-    #     self.updateDisplay()
-    #     self.bind(pos=self.updateDisplay, size=self.updateDisplay)
-    #
-    # def setAndAddCanvasBeforeObjs(self) -> None:
-    #     with self.canvas.before:
-    #         self.rect_color = Color(*util.CLR_BOARD_YELLOW)
-    #         self.rect = Rectangle()
-    #
-    # def updateDisplay(self, *args) -> None:
-    #     self.rect.pos = self.pos
-    #     self.rect.size = self.size
 
 
 ####################################################################################################
@@ -100,35 +160,98 @@ class TreeRowLayout(BoxLayout, util.Helper):
 class Leaf(ButtonBehavior, Widget, util.Helper):
     def __init__(self):
         super(Leaf, self).__init__()
-
         self.size_hint = [None, None]
         self.size = [40, 40]
 
+
+class RootLeaf(Leaf):
+    def __init__(self):
+        super(RootLeaf, self).__init__()
         self.setAndAddCanvasBeforeObjs()
         self.updateDisplay()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
-            self.rect_color = Color(*util.CLR_PRISMARINE)
-            self.rect = Rectangle()
+            self.tl_stone_color = Color(*util.CLR_BLACK)
+            self.tl_stone = Ellipse()
+            self.tr_stone_color = Color(*util.CLR_WHITE)
+            self.tr_stone = Ellipse()
+            self.bl_stone_color = Color(*util.CLR_WHITE)
+            self.bl_stone = Ellipse()
+            self.br_stone_color = Color(*util.CLR_BLACK)
+            self.br_stone = Ellipse()
 
     def updateDisplay(self, *args) -> None:
-        self.rect.pos = self.pos
-        self.rect.size = self.size
-
-        print(f"\n{self.rect.pos = }")
-        print(f"{self.rect.size = }")
+        half = self.size[0] / 2
+        self.tl_stone.pos = [self.pos[0], self.pos[1] + half]
+        self.tl_stone.size = [half] * 2
+        self.tr_stone.pos = [self.pos[0] + half, self.pos[1] + half]
+        self.tr_stone.size = [half] * 2
+        self.bl_stone.pos = self.pos
+        self.bl_stone.size = [half] * 2
+        self.br_stone.pos = [self.pos[0] + half, self.pos[1]]
+        self.br_stone.size = [half] * 2
 
 
 class StoneLeaf(Leaf):
-    def __init__(self):
+    def __init__(self, color:str):
         super(StoneLeaf, self).__init__()
+        self.color = util.CLR_BLACK if color == 'b' else util.CLR_WHITE
+        self.setAndAddCanvasBeforeObjs()
+        self.updateDisplay()
+        self.bind(pos=self.updateDisplay, size=self.updateDisplay)
+
+    def setAndAddCanvasBeforeObjs(self) -> None:
+        with self.canvas.before:
+            self.stone_color = Color(*self.color)
+            self.stone = Ellipse()
+
+    def updateDisplay(self, *args) -> None:
+        self.stone.pos = self.pos
+        self.stone.size = self.size
 
 
 class BranchLeaf(Leaf):
-    def __init__(self):
-        super(Branchleaf, self).__init__()
+    def __init__(self, type:str):
+        super(BranchLeaf, self).__init__()
+        self.line_width = 1.1
+        self.type = type
+        self.setAndAddCanvasBeforeObjs()
+        self.setLineType()
+        self.updateDisplay()
+        self.bind(pos=self.updateDisplay, size=self.updateDisplay)
+
+    def setAndAddCanvasBeforeObjs(self) -> None:
+        with self.canvas.before:
+            self.top_line_color = Color(*util.CLR_WHITE)
+            self.top_line = Line(width=self.line_width)
+            self.right_line_color = Color(*util.CLR_WHITE)
+            self.right_line = Line(width=self.line_width)
+            self.bottom_line_color = Color(*util.CLR_WHITE)
+            self.bottom_line = Line(width=self.line_width)
+
+    def setLineType(self) -> None:
+        colors = [util.CLR_BOARD_YELLOW] * 3
+        if self.type == 'L':  colors[2] = util.CLR_NOTHING
+        elif self.type == '|':  colors[1] = util.CLR_NOTHING
+        self.top_line_color.rgba = colors[0]
+        self.right_line_color.rgba = colors[1]
+        self.bottom_line_color.rgba = colors[2]
+
+    def setLinePoints(self) -> None:
+        full = self.size[0]
+        half = full / 2
+        center = [self.pos[i] + half for i in range(2)]
+        top = [self.pos[0] + half, self.pos[1] + full]
+        right = [self.pos[0] + full, self.pos[1] + half]
+        bottom = [self.pos[0] + half, self.pos[1]]
+        self.top_line.points = [*center, *top]
+        self.right_line.points = [*center, *right]
+        self.bottom_line.points = [*center, *bottom]
+
+    def updateDisplay(self, *args) -> None:
+        self.setLinePoints()
 
 
 class EmptyLeaf(Leaf):

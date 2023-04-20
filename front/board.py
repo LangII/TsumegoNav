@@ -27,14 +27,16 @@ class Board(GridLayout, util.Helper):
         super(Board, self).__init__()
         Logger.info(f"{NAME}: init Board")
         self.data['back']['board'] = board.Board()
-        self.size_hint = [1.0, None]
+        self.size_hint = [None, None]
         self.cols = self.data['board']['size']
         self.padding = util.PAD_V_MAIN_MID
+        self.main_scroll_bar_pad = 0
+
         self.buttons = self.getAndAddButtons()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
     def updateDisplay(self, *args) -> None:
-        self.size = [self.parent.width] * 2
+        self.size = [self.parent.width - self.main_scroll_bar_pad] * 2
 
     def getAndAddButtons(self) -> dict:
         buttons = {}

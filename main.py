@@ -50,7 +50,7 @@ DATA = {
     },
     'back': {
         'board_obj': None,
-        'nav_obj': None,
+        'tree_obj': None,
     }
 }
 
@@ -86,8 +86,6 @@ class MainApp(App):
         self.main_window = MainWindow()
         return self.main_window
 
-
-
     #####  \/  IN APP TESTING
 
     def keyboardInput(self, obj:WindowSDL, num1:int, num2:int, text:str, *args) -> None:
@@ -97,16 +95,19 @@ class MainApp(App):
         print("")
         print(f"{Window.mouse_pos = }")
 
-        board_options = self.main_window.main_scroll.main_scroll_layout.board_options
+        var = self.main_window.main_scroll.vbar
         print("")
-        print(f"{board_options.padding = }")
-        print(f"{board_options.pos = }")
-        print(f"{board_options.size = }")
-        print(f"{board_options.rect.pos = }")
-        print(f"{board_options.rect.size = }\n")
+        print(f"{var = }")
+
+        # board_options = self.main_window.main_scroll.main_scroll_layout.board_options
+        # print("")
+        # print(f"{board_options.padding = }")
+        # print(f"{board_options.pos = }")
+        # print(f"{board_options.size = }")
+        # print(f"{board_options.rect.pos = }")
+        # print(f"{board_options.rect.size = }\n")
 
     #####  /\  IN APP TESTING
-
 
 
 class MainWindow(BoxLayout, util.Helper):
@@ -119,8 +120,6 @@ class MainWindow(BoxLayout, util.Helper):
 
         # Fixes problem where content does not stay at top of scroll during window resizing.
         self.bind(pos=self.main_scroll.updateDisplay, size=self.main_scroll.updateDisplay)
-
-
 
         #####  \/  SETUP TESTING
 
@@ -140,10 +139,26 @@ class MainScroll(ScrollView, util.Helper):
     def __init__(self):
         super(MainScroll, self).__init__()
         Logger.info(f"{NAME}: init MainScroll")
-        self.size_hint = [1.0, None]
         self.size = [Window.width, Window.height]
+        self.scroll_type = ['bars']
+        self.bar_width = util.SCROLL_BAR_WIDTH_MAIN
+        self.bar_color = util.CLR_DARK_PRISMARINE
+        self.bar_inactive_color = util.CLR_DARK_PRISMARINE
+        self.bar_margin = util.PAD_MAIN
+
         self.main_scroll_layout = MainScrollLayout()
         self.add_widget(self.main_scroll_layout)
+
+        self.bind(pos=self.scrollBarVisibleCheck, size=self.scrollBarVisibleCheck)
+        self.scrollBarVisibleCheck()
+
+    def scrollBarVisibleCheck(self, *args) -> None:
+        if self.vbar == (0, 1.0):
+            self.main_scroll_layout.padding = [0, 0, 0, 0]
+            self.main_scroll_layout.board.main_scroll_bar_pad_mod = 0
+        else:
+            self.main_scroll_layout.padding = [0, 0, self.bar_width + util.PAD_MAIN, 0]
+            self.main_scroll_layout.board.main_scroll_bar_pad_mod = self.bar_width + util.PAD_MAIN
 
     def updateDisplay(self, *args):
         # See note for MainWindow.bind().
@@ -160,16 +175,17 @@ class MainScrollLayout(BoxLayout, util.Helper):
 
         self.board_options = BoardOptions()
         self.add_widget(self.board_options)
-
         self.board = Board()
         self.add_widget(self.board)
-
         self.tree = Tree()
         self.add_widget(self.tree)
 
-        # Not sure why this is needed, but the example in the docs has it.  \_(**)_/
-        self.bind(minimum_height=self.setter('height'))
-
+        self.bind(
+            pos=self.board.updateDisplay,
+            size=self.board.updateDisplay,
+            # Not sure why this is needed, but the example in the docs has it.  \_(**)_/
+            minimum_height=self.setter('height')
+        )
 
 
 ####################################################################################################

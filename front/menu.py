@@ -30,8 +30,10 @@ class BoardOptions(BoxLayout, util.Helper):
         self.padding = [self.padding_outer[i] + self.padding_inner[i] for i in range(4)]
         self.spacing = util.SPC_MAIN
         self.setAndAddCanvasBeforeObjs()
+
         self.cur_next_stone_options = CurNextStoneOptions()
         self.add_widget(self.cur_next_stone_options)
+
         self.updateDisplay()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
@@ -139,32 +141,4 @@ class NextStoneButton(CurNextStoneButton):
     def on_release(self) -> None:
         self.cycleColor()
         self.cycleNextStoneState()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
