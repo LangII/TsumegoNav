@@ -155,10 +155,10 @@ class MainScroll(ScrollView, util.Helper):
     def scrollBarVisibleCheck(self, *args) -> None:
         if self.vbar == (0, 1.0):
             self.main_scroll_layout.padding = [0, 0, 0, 0]
-            self.main_scroll_layout.board.main_scroll_bar_pad_mod = 0
+            self.main_scroll_layout.board.main_scroll_bar_pad = 0
         else:
             self.main_scroll_layout.padding = [0, 0, self.bar_width + util.PAD_MAIN, 0]
-            self.main_scroll_layout.board.main_scroll_bar_pad_mod = self.bar_width + util.PAD_MAIN
+            self.main_scroll_layout.board.main_scroll_bar_pad = self.bar_width + util.PAD_MAIN
 
     def updateDisplay(self, *args):
         # See note for MainWindow.bind().
