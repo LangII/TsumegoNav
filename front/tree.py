@@ -65,16 +65,9 @@ class TreeScroll(ScrollView, util.Helper):
         super(TreeScroll, self).__init__()
         Logger.info(f"{NAME}: init TreeScroll")
 
-        # self.size_hint = [1.0, 1.0]
-        # self.size_hint = [1.0, None]
         self.size_hint = [None, None]
-        # self.width = 200
-
-        # self.height = 150
 
         self.padding = util.PAD_MAIN_ALL
-
-        # self.padding = [0, 0, 0, 0]
 
         self.scroll_type = ['bars']
         self.bar_width = util.SCROLL_BAR_WIDTH_SECONDARY
