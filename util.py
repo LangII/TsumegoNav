@@ -36,6 +36,7 @@ PAD_MAIN_ALL =      [PAD_MAIN, PAD_MAIN, PAD_MAIN, PAD_MAIN]
 SPC_MAIN = 8
 
 SCROLL_BAR_WIDTH_MAIN = 16
+SCROLL_BAR_WIDTH_SECONDARY = PAD_MAIN
 
 
 ####################################################################################################

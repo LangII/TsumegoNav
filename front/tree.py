@@ -19,19 +19,27 @@ NAME = util.getNameFromFile(__file__)
 ####################################################################################################
 
 
-class Tree(ScrollView, util.Helper):
+class Tree(BoxLayout, util.Helper):
     def __init__(self):
         super(Tree, self).__init__()
         Logger.info(f"{NAME}: init Tree")
+
+        self.orientation = 'vertical'
         self.size_hint = [1.0, None]
         self.height = 200
-        self.padding = util.PAD_V_MAIN_BOTTOM
+
+        self.padding = util.PAD_MAIN_ALL
+        # self.padding = util.PAD_V_MAIN_BOTTOM
+
         self.setAndAddCanvasBeforeObjs()
         self.updateDisplay()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
-        self.tree_layout = TreeLayout()
-        self.add_widget(self.tree_layout)
+        self.tree_scroll = TreeScroll()
+        self.add_widget(self.tree_scroll)
+        self.tree_scroll.initPlus()
+
+        # self.add_widget(Widget())
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
@@ -39,13 +47,69 @@ class Tree(ScrollView, util.Helper):
             self.rect = Rectangle()
 
     def updateDisplay(self, *args) -> None:
+
+        # self.rect.pos = self.pos
+        # self.rect.size = self.size
+
         self.rect.pos = [
             self.pos[0] + self.padding[0],
             self.pos[1] + self.padding[3]
         ]
         self.rect.size = [
             self.size[0] - self.padding[2] - self.padding[2],
-            self.size[1] - self.padding[1] - self.padding[1]
+            self.size[1] - self.padding[1]
+        ]
+
+class TreeScroll(ScrollView, util.Helper):
+    def __init__(self):
+        super(TreeScroll, self).__init__()
+        Logger.info(f"{NAME}: init TreeScroll")
+
+        # self.size_hint = [1.0, 1.0]
+        # self.size_hint = [1.0, None]
+        self.size_hint = [None, None]
+        # self.width = 200
+
+        # self.height = 150
+
+        self.padding = util.PAD_MAIN_ALL
+
+        # self.padding = [0, 0, 0, 0]
+
+        self.scroll_type = ['bars']
+        self.bar_width = util.SCROLL_BAR_WIDTH_SECONDARY
+        self.bar_color = util.CLR_PRISMARINE
+        self.bar_inactive_color = util.CLR_PRISMARINE
+        # self.bar_margin = util.PAD_MAIN
+
+        # self.setAndAddCanvasBeforeObjs()
+
+        self.tree_layout = TreeLayout()
+        self.add_widget(self.tree_layout)
+        self.tree_layout.extraFunc()
+
+
+    def initPlus(self) -> None:
+        self.updateDisplay()
+        self.bind(pos=self.updateDisplay, size=self.updateDisplay)
+
+    # def initPlus(self) -> None:
+    #     self.pos = self.parent.pos
+    #     self.size = self.parent.size
+
+    # def setAndAddCanvasBeforeObjs(self) -> None:
+    #     with self.canvas.before:
+    #         self.rect_color = Color(*util.CLR_NOTHING)
+    #         self.rect = Rectangle()
+
+    def updateDisplay(self, *args) -> None:
+        self.pos = [
+            self.parent.pos[0] + self.padding[0] + 8,
+            self.parent.pos[1] + self.padding[3] + 8
+        ]
+        self.size = [
+            self.parent.size[0] - self.padding[2] - self.padding[2] - 16,
+            self.parent.size[1] - self.padding[1] - self.padding[1] - 8
         ]
 
 
@@ -55,8 +119,36 @@ class TreeLayout(BoxLayout, util.Helper):
         Logger.info(f"{NAME}: init TreeLayout")
         self.orientation = 'vertical'
         self.spacing = 0
-        self.padding = util.PAD_MAIN_ALL
+
+        # self.padding = util.PAD_MAIN_ALL
+        # self.padding = [20, -20, 20, 20]
+        # self.padding = [8, 0, 8, 8]
+
         self.size_hint = [None, None]
+
+        # self.size = [800, 800]
+
+        # self.width =
+
+        self.bind(minimum_height=self.setter('height'), minimum_width=self.setter('width'))
+
+
+
+
+
+        """
+        2023-04-21
+        TURNOVER NOTES:
+        - Finally have functional Tree scroll bars.
+        - Now need to figure out how to get all contents of Tree to be inside padding.
+            - I think I'll need to put the whole TreeScroll inside another dumby widget, just to get
+            the dumby widget's padding.
+        """
+
+
+
+
+
 
         #####  \/  MANUAL LEAF LAYOUT FOR TESTING
 
@@ -78,70 +170,125 @@ class TreeLayout(BoxLayout, util.Helper):
         self.tree_row_layout_1.stone_leaf_4 = StoneLeaf('w')
         self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_4)
 
+        self.tree_row_layout_1.stone_leaf_5 = StoneLeaf('b')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_5)
+
+        self.tree_row_layout_1.stone_leaf_6 = StoneLeaf('w')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_6)
+
+        self.tree_row_layout_1.stone_leaf_7 = StoneLeaf('b')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_7)
+
+        self.tree_row_layout_1.stone_leaf_8 = StoneLeaf('w')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_8)
+
+        self.tree_row_layout_1.stone_leaf_9 = StoneLeaf('b')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_9)
+
+        self.tree_row_layout_1.stone_leaf_10 = StoneLeaf('w')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_10)
+
+        self.tree_row_layout_1.stone_leaf_11 = StoneLeaf('b')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_11)
+
+        self.tree_row_layout_1.stone_leaf_12 = StoneLeaf('w')
+        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_12)
+
+        self.tree_row_layout_1.resizeAfterChildren()
+
         self.tree_row_layout_2 = TreeRowLayout()
         self.add_widget(self.tree_row_layout_2)
 
         self.tree_row_layout_2.branch_leaf_1 = BranchLeaf('|')
         self.tree_row_layout_2.add_widget(self.tree_row_layout_2.branch_leaf_1)
-
-        self.tree_row_layout_2.empty_leaf_2 = EmptyLeaf()
-        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.empty_leaf_2)
-
-        self.tree_row_layout_2.empty_leaf_3 = EmptyLeaf()
-        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.empty_leaf_3)
-
-        self.tree_row_layout_2.branch_leaf_2 = BranchLeaf('L')
-        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.branch_leaf_2)
-
-        self.tree_row_layout_2.stone_leaf_1 = StoneLeaf('w')
-        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.stone_leaf_1)
-
-        self.tree_row_layout_2.stone_leaf_2 = StoneLeaf('b')
-        self.tree_row_layout_2.add_widget(self.tree_row_layout_2.stone_leaf_2)
+        #
+        # self.tree_row_layout_2.empty_leaf_2 = EmptyLeaf()
+        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.empty_leaf_2)
+        #
+        # self.tree_row_layout_2.empty_leaf_3 = EmptyLeaf()
+        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.empty_leaf_3)
+        #
+        # self.tree_row_layout_2.branch_leaf_2 = BranchLeaf('L')
+        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.branch_leaf_2)
+        #
+        # self.tree_row_layout_2.stone_leaf_1 = StoneLeaf('w')
+        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.stone_leaf_1)
+        #
+        # self.tree_row_layout_2.stone_leaf_2 = StoneLeaf('b')
+        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.stone_leaf_2)
+        #
+        self.tree_row_layout_2.resizeAfterChildren()
 
         self.tree_row_layout_3 = TreeRowLayout()
         self.add_widget(self.tree_row_layout_3)
 
         self.tree_row_layout_3.branch_leaf_1 = BranchLeaf('T')
         self.tree_row_layout_3.add_widget(self.tree_row_layout_3.branch_leaf_1)
-
-        self.tree_row_layout_3.stone_leaf_1 = StoneLeaf('b')
-        self.tree_row_layout_3.add_widget(self.tree_row_layout_3.stone_leaf_1)
-
-        self.tree_row_layout_3.stone_leaf_2 = StoneLeaf('w')
-        self.tree_row_layout_3.add_widget(self.tree_row_layout_3.stone_leaf_2)
+        #
+        # self.tree_row_layout_3.stone_leaf_1 = StoneLeaf('b')
+        # self.tree_row_layout_3.add_widget(self.tree_row_layout_3.stone_leaf_1)
+        #
+        # self.tree_row_layout_3.stone_leaf_2 = StoneLeaf('w')
+        # self.tree_row_layout_3.add_widget(self.tree_row_layout_3.stone_leaf_2)
+        #
+        self.tree_row_layout_3.resizeAfterChildren()
 
         self.tree_row_layout_4 = TreeRowLayout()
         self.add_widget(self.tree_row_layout_4)
 
         self.tree_row_layout_4.branch_leaf_1 = BranchLeaf('|')
         self.tree_row_layout_4.add_widget(self.tree_row_layout_4.branch_leaf_1)
-
-        self.tree_row_layout_4.branch_leaf_2 = BranchLeaf('L')
-        self.tree_row_layout_4.add_widget(self.tree_row_layout_4.branch_leaf_2)
-
-        self.tree_row_layout_4.stone_leaf_1 = StoneLeaf('w')
-        self.tree_row_layout_4.add_widget(self.tree_row_layout_4.stone_leaf_1)
+        #
+        # self.tree_row_layout_4.branch_leaf_2 = BranchLeaf('L')
+        # self.tree_row_layout_4.add_widget(self.tree_row_layout_4.branch_leaf_2)
+        #
+        # self.tree_row_layout_4.stone_leaf_1 = StoneLeaf('w')
+        # self.tree_row_layout_4.add_widget(self.tree_row_layout_4.stone_leaf_1)
+        #
+        self.tree_row_layout_4.resizeAfterChildren()
 
         self.tree_row_layout_5 = TreeRowLayout()
         self.add_widget(self.tree_row_layout_5)
 
         self.tree_row_layout_5.branch_leaf_1 = BranchLeaf('L')
         self.tree_row_layout_5.add_widget(self.tree_row_layout_5.branch_leaf_1)
+        #
+        # self.tree_row_layout_5.stone_leaf_1 = StoneLeaf('b')
+        # self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_1)
+        #
+        # self.tree_row_layout_5.stone_leaf_2 = StoneLeaf('w')
+        # self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_2)
+        #
+        # self.tree_row_layout_5.stone_leaf_3 = StoneLeaf('b')
+        # self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_3)
 
-        self.tree_row_layout_5.stone_leaf_1 = StoneLeaf('b')
-        self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_1)
-
-        self.tree_row_layout_5.stone_leaf_2 = StoneLeaf('w')
-        self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_2)
-
-        self.tree_row_layout_5.stone_leaf_3 = StoneLeaf('b')
-        self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_3)
-
-        #####  /\  MANUAL LEAF LAYOUT FOR TESTING
+        self.tree_row_layout_5.resizeAfterChildren()
 
         # Forces children to top instead of bottom.
         self.add_widget(Widget())
+
+        self.resizeAfterChildren()
+
+        #####  /\  MANUAL LEAF LAYOUT FOR TESTING
+
+    def extraFunc(self):
+        self.bind(pos=self.updateDisplay, size=self.updateDisplay)
+        self.updateDisplay()
+
+    def updateDisplay(self, *args) -> None:
+        # self.pos = self.parent.rect.pos
+        # self.size = self.parent.rect.size
+        # self.pos = [self.parent.pos[i] + 16 for i in range(2)]
+        # self.size = [self.parent.size[i] - 36 for i in range(2)]
+
+        return
+
+        self.pos = [self.parent.pos[0] + 8, self.parent.pos[1] + 8]
+        self.size = self.parent.size
+
+    def resizeAfterChildren(self) -> None:
+        self.height = 40 * len(self.children)
+        self.width = max([c.width for c in self.children])
 
 
 class TreeRowLayout(BoxLayout, util.Helper):
@@ -149,9 +296,15 @@ class TreeRowLayout(BoxLayout, util.Helper):
         super(TreeRowLayout, self).__init__()
         self.orientation = 'horizontal'
         self.spacing = 0
-        self.padding = util.PAD_V_MAIN_MID
-        self.size_hint = [1.0, None]
+        # self.padding = util.PAD_V_MAIN_MID
+
+        # self.size_hint = [1.0, None]
+        self.size_hint = [None, None]
+
         self.height = 40
+
+    def resizeAfterChildren(self) -> None:
+        self.size = [40 * len(self.children), 40]
 
 
 ####################################################################################################

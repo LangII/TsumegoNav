@@ -16,6 +16,7 @@ from kivy.core.window import Window
 from kivy.core.window.window_sdl2 import WindowSDL
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
+# from kivy.uix.widget import Widget
 
 import util
 from front.menu import BoardOptions
@@ -30,7 +31,7 @@ NAME = util.getNameFromFile(__file__)
 
 DATA = {
     'window': {
-        'size_default': [600, 800],
+        'size_default': [400, 600],
     },
     'board': {
         'size': 19,
@@ -95,9 +96,11 @@ class MainApp(App):
         print("")
         print(f"{Window.mouse_pos = }")
 
-        var = self.main_window.main_scroll.vbar
+        var1 = self.main_window.main_scroll.main_scroll_layout.tree.tree_scroll.viewport_size
+        # var2 = self.main_window.main_scroll.main_scroll_layout.tree.tree_layout.size
         print("")
-        print(f"{var = }")
+        print(f"{var1 = }")
+        # print(f"{var2 = }")
 
         # board_options = self.main_window.main_scroll.main_scroll_layout.board_options
         # print("")
@@ -173,12 +176,29 @@ class MainScrollLayout(BoxLayout, util.Helper):
         self.orientation = 'vertical'
         self.spacing = util.SPC_MAIN
 
+        # self.padding = util.PAD_MAIN_ALL
+
         self.board_options = BoardOptions()
         self.add_widget(self.board_options)
+
         self.board = Board()
         self.add_widget(self.board)
+
+
+
+        # self.extra = BoxLayout()
+        # self.add_widget(self.extra)
+        #
+        # self.extra.padding = util.PAD_MAIN_ALL
+        # self.extra.orientation = 'horizontal'
+        #
+        # self.extra.tree = Tree()
+        # self.extra.add_widget(self.extra.tree)
+
         self.tree = Tree()
         self.add_widget(self.tree)
+
+        # self.add_widget(Widget())
 
         self.bind(
             pos=self.board.updateDisplay,
