@@ -102,14 +102,6 @@ class MainApp(App):
         print(f"{var1 = }")
         # print(f"{var2 = }")
 
-        # board_options = self.main_window.main_scroll.main_scroll_layout.board_options
-        # print("")
-        # print(f"{board_options.padding = }")
-        # print(f"{board_options.pos = }")
-        # print(f"{board_options.size = }")
-        # print(f"{board_options.rect.pos = }")
-        # print(f"{board_options.rect.size = }\n")
-
     #####  /\  IN APP TESTING
 
 
@@ -176,29 +168,14 @@ class MainScrollLayout(BoxLayout, util.Helper):
         self.orientation = 'vertical'
         self.spacing = util.SPC_MAIN
 
-        # self.padding = util.PAD_MAIN_ALL
-
         self.board_options = BoardOptions()
         self.add_widget(self.board_options)
 
         self.board = Board()
         self.add_widget(self.board)
 
-
-
-        # self.extra = BoxLayout()
-        # self.add_widget(self.extra)
-        #
-        # self.extra.padding = util.PAD_MAIN_ALL
-        # self.extra.orientation = 'horizontal'
-        #
-        # self.extra.tree = Tree()
-        # self.extra.add_widget(self.extra.tree)
-
         self.tree = Tree()
         self.add_widget(self.tree)
-
-        # self.add_widget(Widget())
 
         self.bind(
             pos=self.board.updateDisplay,
