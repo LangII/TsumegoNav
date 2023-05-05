@@ -38,7 +38,7 @@ def main():
 ####################################################################################################
 
 
-class Board():
+class Board(util.Helper):
     """
     NOTES:
     - All board coordinates are represented in the form of '[y, x]'.  Where 'y' represents the
@@ -47,6 +47,7 @@ class Board():
     ending at 'self.size - 1' in the top-right.
     """
     def __init__(self, settings:dict=SETTINGS):
+        super(Board, self).__init__()
         Logger.info(f"{NAME}: init Board")
         self.size = settings['size']
         self.black_char = settings['black_char']
@@ -59,11 +60,11 @@ class Board():
         self.board_pos_history = []
         self.stones = {'b': [], 'w': []}
         self.groups = {'b': [], 'w': []}
-        self.resetBoard()
         self.play_data = {
             'color': None, 'opp_color': None, 'char': None, 'opp_char': None, 'coord': None,
             'y': None, 'x': None, 'temp_board': None, 'capturing_groups': None, 'makes_ko': None,
         }
+        self.resetBoard(self.data['input']['cur_problem'])
 
     def printBoard(self) -> None:
         print("")

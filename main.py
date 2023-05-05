@@ -20,8 +20,10 @@ from kivy.uix.scrollview import ScrollView
 
 import util
 from front.menu import BoardOptions
-from front.board import Board
-from front.tree import Tree
+from front.board import Board as FrontBoard
+from front.tree import Tree as FrontTree
+from back.board import Board as BackBoard
+from back.tree import Tree as BackTree
 
 
 ####################################################################################################
@@ -31,7 +33,7 @@ NAME = util.getNameFromFile(__file__)
 
 DATA = {
     'window': {
-        'size_default': [400, 600],
+        'size_default': [600, 800],
     },
     'board': {
         'size': 19,
@@ -43,16 +45,23 @@ DATA = {
         },
     },
     'input': {
+        'cur_problem': {
+            'b': [[2, 2], [2, 3], [2, 4], [2, 5], [1, 7], ],
+            'w': [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5], ]
+        },
         'board_options': {
             'cur_stone': 'black',  # 'black' or 'white'
             'next_stone': 'white',  # 'black' or 'white'
             'next_stone_state': 'alternate',  # 'alternate' or 'consecutive'
         },
+        'tree_options': {
+            'cur_leaf_i': 0,
+        },
     },
     'back': {
-        'board_obj': None,
-        'tree_obj': None,
-    }
+        'board': None,
+        'tree': None,
+    },
 }
 
 
@@ -83,6 +92,9 @@ class MainApp(App):
         Window.clearcolor = util.CLR_PRISMARINE
         Window.bind(on_key_down=self.keyboardInput)
 
+        self.data['back']['board'] = BackBoard()
+        self.data['back']['tree'] = BackTree()
+
     def build(self):
         self.main_window = MainWindow()
         return self.main_window
@@ -96,10 +108,11 @@ class MainApp(App):
         print("")
         print(f"{Window.mouse_pos = }")
 
-        var1 = self.main_window.main_scroll.main_scroll_layout.tree.tree_scroll.viewport_size
+        # var1 = self.main_window.main_scroll.main_scroll_layout.tree.tree_scroll.viewport_size
         # var2 = self.main_window.main_scroll.main_scroll_layout.tree.tree_layout.size
         print("")
-        print(f"{var1 = }")
+        print(f"{self.data['back']['tree'].tree = }")
+        print(f"{self.data['back']['tree'].leaves[1].stone_pos = }")
         # print(f"{var2 = }")
 
     #####  /\  IN APP TESTING
@@ -118,13 +131,14 @@ class MainWindow(BoxLayout, util.Helper):
 
         #####  \/  SETUP TESTING
 
-        presets = {
-            'b': [[2, 2], [2, 3], [2, 4], [2, 5], [1, 7],],
-            'w': [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5],]
-        }
-        for color, coords in presets.items():
-            for coord in coords:
-                self.main_scroll.main_scroll_layout.board.buttons[str(coord)].setStoneColor(color)
+        # presets = {
+        #     'b': [[2, 2], [2, 3], [2, 4], [2, 5], [1, 7],],
+        #     'w': [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5],]
+        # }
+        # for color, coords in presets.items():
+        #     for coord in coords:
+        #         self.main_scroll.main_scroll_layout.board.buttons[str(coord)].setStoneColor(color)
+        # self.data['back']['board'].resetBoard(presets)
 
         ##### /\  SETUP TESTING
 
@@ -171,10 +185,10 @@ class MainScrollLayout(BoxLayout, util.Helper):
         self.board_options = BoardOptions()
         self.add_widget(self.board_options)
 
-        self.board = Board()
+        self.board = FrontBoard()
         self.add_widget(self.board)
 
-        self.tree = Tree()
+        self.tree = FrontTree()
         self.add_widget(self.tree)
 
         self.bind(

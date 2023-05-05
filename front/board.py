@@ -35,6 +35,8 @@ class Board(GridLayout, util.Helper):
         self.buttons = self.getAndAddButtons()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
+        self.resetBoard(self.data['input']['cur_problem'])
+
     def updateDisplay(self, *args) -> None:
         self.size = [self.parent.width - self.main_scroll_bar_pad] * 2
 
@@ -49,6 +51,11 @@ class Board(GridLayout, util.Helper):
 
     def getButtonByCoord(self, coord:list[int]) -> BoardButton:
         return self.buttons[str(coord)]
+
+    def resetBoard(self, stones:dict[list[list]]) -> None:
+        for color, coords in stones.items():
+            for coord in coords:
+                self.buttons[str(coord)].setStoneColor(color)
 
 
 class BoardButton(ButtonBehavior, Widget, util.Helper):
@@ -140,7 +147,47 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
         self.stone_line_color.rgba = util.CLR_BLACK
 
     def on_release(self) -> None:
-        if self.cur_stone == self.data['input']['board_options']['cur_stone']:
+        if self.cur_stone == 'no':
+
+            """
+            2023-05-03
+            TURNOVER NOTES:
+            - Currently working on trying to get a functional back.tree.add_leaf() triggered from
+            a BoardButton working.  At the very least we need to see the print out of the updates of
+            back.tree (not worrying about the front.tree just yet).
+            """
+
+            # print(f"{self.data['back']['board'].stones = }")
+            # print(f"{self.data['back']['tree'].leaves[0].board_pos = }")
+
+            """
+            2023-05-05
+            TURNOVER NOTES:
+            - Looks like I've done a fair job loading the back.tree with a new leaf from front.board
+            button.  I'm sure there's a few attributes I still need to set, but looks good so far.
+            - Next is to update front.board from front.board button.  Then see if continuous
+            front.board buttons will give expected behavior. 
+            - Still need to set data['cur_leaf_i'] with front.board button.
+            """
+
+            back_leaves = self.data['back']['tree'].leaves
+            cur_leaf = back_leaves[self.data['input']['tree_options']['cur_leaf_i']]
+            leaf_kwargs = {
+                'stone_color': 'b' if cur_leaf.stone_color == 'w' else 'w',
+                'move_count': cur_leaf.move_count + 1,
+                'stone_pos': self.coord,
+                'parent_leaf_i': cur_leaf.leaf_i
+            }
+            leaf_kwargs['board_pos'] = cur_leaf.board_pos
+            leaf_kwargs['board_pos'][leaf_kwargs['stone_color']] += [leaf_kwargs['stone_pos']]
+
+
+            self.data['back']['tree'].addLeaf(
+                path_to_parent=cur_leaf.path_to_self,
+                leaf_kwargs=leaf_kwargs,
+            )
+
+        elif self.cur_stone == self.data['input']['board_options']['cur_stone']:
             self.setToNoStone()
         else:
             self.setStoneColor()
