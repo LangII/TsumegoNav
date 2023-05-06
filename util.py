@@ -44,7 +44,9 @@ SCROLL_BAR_WIDTH_SECONDARY = PAD_MAIN
 
 class Helper():
     def __init__(self):
-        self.data = App.get_running_app().data
+        app = App.get_running_app()
+        if app:  self.data = app.data
+        else:  self.data = None
 
 
 ####################################################################################################

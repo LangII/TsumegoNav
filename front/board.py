@@ -1,6 +1,7 @@
 
 
 from __future__ import annotations
+from copy import deepcopy
 
 from kivy.logger import Logger
 from kivy.uix.gridlayout import GridLayout
@@ -53,6 +54,8 @@ class Board(GridLayout, util.Helper):
         return self.buttons[str(coord)]
 
     def resetBoard(self, stones:dict[list[list]]) -> None:
+        all_coords = [[i // self.cols, i % self.cols] for i in range(self.cols ** 2)]
+        for coord in all_coords:  self.buttons[str(coord)].setToNoStone()
         for color, coords in stones.items():
             for coord in coords:
                 self.buttons[str(coord)].setStoneColor(color)
@@ -178,14 +181,19 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
                 'stone_pos': self.coord,
                 'parent_leaf_i': cur_leaf.leaf_i
             }
-            leaf_kwargs['board_pos'] = cur_leaf.board_pos
+            leaf_kwargs['board_pos'] = deepcopy(cur_leaf.board_pos)
             leaf_kwargs['board_pos'][leaf_kwargs['stone_color']] += [leaf_kwargs['stone_pos']]
 
+            self.data['input']['tree_options']['cur_leaf_i'] = self.data['back']['tree'].next_leaf
 
             self.data['back']['tree'].addLeaf(
-                path_to_parent=cur_leaf.path_to_self,
-                leaf_kwargs=leaf_kwargs,
+                path_to_parent=cur_leaf.path_to_self, leaf_kwargs=leaf_kwargs,
             )
+
+
+            self.setStoneColor()
+            if self.data['input']['board_options']['next_stone_state'] == 'alternate':
+                self.cycleCurNextStoneButtons()
 
         elif self.cur_stone == self.data['input']['board_options']['cur_stone']:
             self.setToNoStone()

@@ -102,7 +102,9 @@ class MainApp(App):
     #####  \/  IN APP TESTING
 
     def keyboardInput(self, obj:WindowSDL, num1:int, num2:int, text:str, *args) -> None:
+        Logger.info(f"{NAME}: keyboardInput text = '{text}'")
         if text == ' ':  self.spaceBarInput()
+        if text in ['w', 'a', 's', 'd']:  self.wasdInput(text)
 
     def spaceBarInput(self) -> None:
         print("")
@@ -111,9 +113,53 @@ class MainApp(App):
         # var1 = self.main_window.main_scroll.main_scroll_layout.tree.tree_scroll.viewport_size
         # var2 = self.main_window.main_scroll.main_scroll_layout.tree.tree_layout.size
         print("")
-        print(f"{self.data['back']['tree'].tree = }")
-        print(f"{self.data['back']['tree'].leaves[1].stone_pos = }")
+        # print(f"{self.data['back']['tree'].tree = }")
+        # print(f"{self.data['back']['tree'].leaves[1].stone_pos = }")
         # print(f"{var2 = }")
+        self.data['back']['tree'].printLeaves()
+        self.data['back']['tree'].printTree()
+
+    def wasdInput(self, key:str) -> None:
+
+        if key == 'a':
+
+            cur_leaf_i = self.data['input']['tree_options']['cur_leaf_i']
+            if cur_leaf_i == 0:  return
+            back_tree = self.data['back']['tree']
+            front_board = self.main_window.main_scroll.main_scroll_layout.board
+            cur_parent_leaf = back_tree.leaves[back_tree.leaves[cur_leaf_i].parent_leaf_i]
+
+            front_board.resetBoard(cur_parent_leaf.board_pos)
+
+            self.data['input']['tree_options']['cur_leaf_i'] = cur_parent_leaf.leaf_i
+
+            self.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.cur_stone_button.cycleColor()
+            self.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.next_stone_button.cycleColor()
+
+        elif key == 's':
+
+            cur_leaf_i = self.data['input']['tree_options']['cur_leaf_i']
+            if cur_leaf_i == 0:  return
+            back_tree = self.data['back']['tree']
+            front_board = self.main_window.main_scroll.main_scroll_layout.board
+            cur_parent_leaf = back_tree.leaves[back_tree.leaves[cur_leaf_i].parent_leaf_i]
+
+            cur_sibling_pos = cur_parent_leaf.children.index(cur_leaf_i)
+            next_sibling_i = 0 if cur_sibling_pos == len(cur_parent_leaf.children) - 1 else cur_sibling_pos + 1
+
+            next_leaf_i = cur_parent_leaf.children[next_sibling_i]
+            next_leaf = back_tree.leaves[next_leaf_i]
+
+            front_board.resetBoard(next_leaf.board_pos)
+
+            self.data['input']['tree_options']['cur_leaf_i'] = next_leaf.leaf_i
+
+        """
+        2023-05-05
+        TURNOVER NOTES:
+        - So far so good.  Currently using keyboard keys to simulate the navigation of front tree.
+        - Next up is add functionality for 'w', 's', and 'd'.
+        """
 
     #####  /\  IN APP TESTING
 

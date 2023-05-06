@@ -1,11 +1,11 @@
 
 
 from __future__ import annotations
-
 import sys
 new_path = __file__
 for _ in range(2):  new_path = new_path[:new_path.rfind('/')]
 sys.path += [new_path]
+
 from copy import deepcopy
 
 from kivy.logger import Logger
