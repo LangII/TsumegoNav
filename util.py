@@ -81,3 +81,21 @@ def convStrListCoordToListCoord(str_list_coord:str) -> list[int]:
 
 NAME = getNameFromFile(__file__)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

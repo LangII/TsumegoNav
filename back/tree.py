@@ -141,43 +141,52 @@ class Tree(util.Helper):
         print(f"\n{self.tree = }")
         # print(json.loads(self.tree, indent=4))
 
-
-
-
-
     def refreshFrontTreeMap(self) -> None:
-
-        tree = deepcopy(self.tree)
-
+        # recursively flatten tree
+        def recurse(d:dict, layer:int=0) -> list:
+            tree_map = []
+            if not d.keys():  return ['\n']
+            for k in d.keys():
+                if tree_map and tree_map[-1] == '\n':  tree_map += [' '] * layer
+                tree_map += [k, *recurse(d[k], layer + 1)]
+            return tree_map
+        tree_map = recurse(self.tree)
+        # reshape to 2D
         self.front_tree_map = [[]]
-
-        leaves_placed = []
-
-        # First, create the complete first row.
-        cur_layer = tree
-        while True:
-            if len(cur_layer.keys()) == 0:  break
-            cur_first_key = list(cur_layer.keys())[0]
-            self.front_tree_map[0] += [cur_first_key]
-            leaves_placed += [cur_first_key]
-            cur_layer = cur_layer[cur_first_key]
-
-        # Second, create the rest of the rows that have a leaf in the 1st layer.
-        for key in list(tree[0].keys())[1:]:
-            self.front_tree_map += [[' ', key]]
-
-
-
-
-
-
+        cur_row = 0
+        for leaf_pos in tree_map[:-1]:
+            if leaf_pos == '\n':
+                self.front_tree_map += [[]]
+                cur_row += 1
+                continue
+            self.front_tree_map[cur_row] += [leaf_pos]
+        # add Ls
+        prev_row_len = 0
+        all_the_Ls = []
+        for y, row in enumerate(self.front_tree_map):
+            for x, leaf_pos in enumerate(row):
+                cur_value = self.front_tree_map[y][x]
+                cur_right_value = self.front_tree_map[y][x + 1] if x < len(row) - 1 else None
+                if cur_value == ' ' and type(cur_right_value) == int:
+                    self.front_tree_map[y][x] = 'L'
+                    all_the_Ls += [[y, x]]
+            prev_row_len = len(row)
+        # add Ts and |s
+        for y, x in all_the_Ls[::-1]:
+            if self.front_tree_map[y][x] != 'L':  continue
+            for new_y in list(range(1, y))[::-1]:
+                new_value = self.front_tree_map[new_y][x]
+                if type(new_value) == int:  break
+                if new_value == 'L':  update = 'T'
+                elif new_value == ' ':  update = '|'
+                self.front_tree_map[new_y][x] = update
 
     def printFrontTreeMap(self) -> None:
+        if not self.front_tree_map:  print("\nself.front_tree_map = []")  ;  return
         pad = len(str(max([x if type(x) == int else 0 for x in sum(self.front_tree_map, [])])))
-        front_tree_map = [[f'{x: {pad}d}' if type(x) == int else ' ' * pad for x in row] for row in self.front_tree_map]
+        front_tree_map = [[str(x).rjust(pad, ' ') for x in row] for row in self.front_tree_map]
         print("\nself.front_tree_map = [")
-        for row in front_tree_map:
-            print(f"\t{' '.join(row)}")
+        for row in front_tree_map:  print(f"\t{' '.join(row)}")
         print("]")
 
 
@@ -244,120 +253,7 @@ class Leaf(util.Helper):
 ####################################################################################################
 
 
-# if __name__ == '__main__':  main()
-
-
-
-
-
-this = {
-    0: {
-        1: {
-            2: {
-                3: {
-                    4: {
-                        5: {
-                            16: {
-                                17: {},
-                            },
-                        },
-                    },
-                },
-                8: {},
-                9: {
-                    10: {},
-                },
-            },
-        },
-        6: {
-            12: {
-                14: {},
-                15: {},
-            },
-            13: {},
-        },
-        7: {
-            11: {},
-        },
-    },
-}
-
-that = []
-
-# for k1 in this.keys():
-#     that += [k1]
-#     for k2 in this[k1].keys():
-#         that += [k2]
-#         for k3 in this[k1][k2].keys():
-#             that += [k3]
-#             for k4 in this[k1][k2].keys():
-#                 that += [k4]
-
-def shit(d=None, layer=None):
-    print(f"\n{d = }")
-    print(f"{layer = }")
-    damnit = []
-    if not d.keys():  return [None]
-    for k in d.keys():
-
-
-        new_damnit = shit(d[k], layer + 1)
-        # new_damnit, end_of_line = shit(d[k], layer + 1)
-        # print(f"{new_damnit = }")
-        # damnit += new_damnit
-
-        # if new_damnit[-1] == '\n':
-        #     print("end_of_line")
-        #     damnit += [' '] * (layer - 1)
-
-        if damnit and damnit[-1] is None:
-            damnit += [' '] * layer
-
-        print(f"{k = }")
-        print(f"{damnit = }")
-        print(f"{layer = }")
-        damnit += [k]
-
-        damnit += new_damnit
-
-
-    return damnit
-
-def more_shit(damnit):
-    more_damnit = [[]]
-    cur_row = 0
-    for d in damnit[:-1]:
-        if d is None:
-            more_damnit += [[]]
-            cur_row += 1
-            continue
-        more_damnit[cur_row] += [d]
-    return more_damnit
-
-# def more_more_shit(more):
-#     shit = []
-#     for row in
-
-that = shit(this, 0)
-that = more_shit(that)
-# that = more_more_shit(that)
-
-print(f"\n{this = }")
-print("")
-for row in that:  print(row)
-# print(f"\n{that = }")
-
-"""
-2023-05-06
-TURNOVER NOTES:
-- This ^ is it!!!  Do not lose this!  Yes, it's super ugly.  But this is how to get front_tree_map!
-- Next to do is clean up, get it out of this unit test, and implement!
-"""
-
-
-
-
-
+if __name__ == '__main__':  main()
 
 
 
