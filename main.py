@@ -5,6 +5,17 @@ TURNOVER NOTES:
 
 2023-03-17
 - Next to do is make a board.  Review board from GoCalc for references...  Good luck!
+
+2023-05-11
+- Doing very good at building Front Tree and making it interactive with Front Board, Back Board, and
+Back Tree.  "Doing very good", yes functional, but still very dirty.  Need to clean!
+- Next is make it so user can click on Leaves in Front Tree and have the Front Board update to the
+board position of the Front Tree Leaf clicked on.
+- Then update Front Board so a Symbol appears on Stone of 'stone_pos' of Front Tree Cur Leaf.  Be
+sure to make Symbol dynamic.
+- Also need to make it so that if on a Leaf that already has children leaves, the user can click
+on a Front Board position that is already a child, and the Front Board and Front Tree, instead of
+creating a new Leaf, will just take the user to Leaf of clicked board position.
 """
 
 
@@ -55,7 +66,8 @@ DATA = {
             'next_stone_state': 'alternate',  # 'alternate' or 'consecutive'
         },
         'tree_options': {
-            'cur_leaf_i': 0,
+            'cur_back_leaf_i': 0,
+            # 'cur_front_leaf_i': 0,
         },
     },
     'back': {
@@ -97,6 +109,7 @@ class MainApp(App):
 
     def build(self):
         self.main_window = MainWindow()
+        self.main_window.main_scroll.main_scroll_layout.tree.refreshLayout()
         return self.main_window
 
     #####  \/  IN APP TESTING
@@ -117,13 +130,15 @@ class MainApp(App):
         # print(f"{self.data['back']['tree'].leaves[1].stone_pos = }")
         # print(f"{var2 = }")
         self.data['back']['tree'].printLeaves()
-        self.data['back']['tree'].printTree()
+        # self.data['back']['tree'].printTree()
+        # front_tree_leaves = self.main_window.main_scroll.main_scroll_layout.tree.leaves
+        # print(f"{front_tree_leaves = }")
 
     def wasdInput(self, key:str) -> None:
 
         if key == 'a':
 
-            cur_leaf_i = self.data['input']['tree_options']['cur_leaf_i']
+            cur_leaf_i = self.data['input']['tree_options']['cur_back_leaf_i']
             if cur_leaf_i == 0:  return
             back_tree = self.data['back']['tree']
             front_board = self.main_window.main_scroll.main_scroll_layout.board
@@ -131,14 +146,18 @@ class MainApp(App):
 
             front_board.resetBoard(cur_parent_leaf.board_pos)
 
-            self.data['input']['tree_options']['cur_leaf_i'] = cur_parent_leaf.leaf_i
+            back_tree.leaves[cur_leaf_i].is_cur_board = False
+            cur_parent_leaf.is_cur_board = True
+            self.main_window.main_scroll.main_scroll_layout.tree.refreshLayout()
+
+            self.data['input']['tree_options']['cur_back_leaf_i'] = cur_parent_leaf.back_leaf_i
 
             self.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.cur_stone_button.cycleColor()
             self.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.next_stone_button.cycleColor()
 
         elif key == 's':
 
-            cur_leaf_i = self.data['input']['tree_options']['cur_leaf_i']
+            cur_leaf_i = self.data['input']['tree_options']['cur_back_leaf_i']
             if cur_leaf_i == 0:  return
             back_tree = self.data['back']['tree']
             front_board = self.main_window.main_scroll.main_scroll_layout.board
@@ -152,7 +171,7 @@ class MainApp(App):
 
             front_board.resetBoard(next_leaf.board_pos)
 
-            self.data['input']['tree_options']['cur_leaf_i'] = next_leaf.leaf_i
+            self.data['input']['tree_options']['cur_back_leaf_i'] = next_leaf.back_leaf_i
 
         """
         2023-05-05
@@ -236,6 +255,7 @@ class MainScrollLayout(BoxLayout, util.Helper):
 
         self.tree = FrontTree()
         self.add_widget(self.tree)
+        self.tree.refreshLayout()
 
         self.bind(
             pos=self.board.updateDisplay,

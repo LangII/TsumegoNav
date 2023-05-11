@@ -27,13 +27,17 @@ class Tree(BoxLayout, util.Helper):
         self.size_hint = [1.0, None]
         self.height = 200
         self.padding = util.PAD_MAIN_ALL
+        self.tree_row_layouts = []
+        self.leaves = []
+
         self.setAndAddCanvasBeforeObjs()
         self.updateDisplay()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
-
         self.tree_scroll = TreeScroll()
         self.add_widget(self.tree_scroll)
         self.tree_scroll.initPlus()
+
+        self.refreshLayout()
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
@@ -50,6 +54,48 @@ class Tree(BoxLayout, util.Helper):
             self.size[1] - self.padding[1]
         ]
 
+    def refreshLayout(self) -> None:
+        self.tree_scroll.tree_layout.clear_widgets()
+        self.tree_row_layouts = []
+        self.leaves = []
+        if not self.data['back']['tree'].front_tree_map:
+            root_leaf = RootLeaf(0, is_cur_board=True)
+            self.leaves += [root_leaf]
+            new_tree_row_layout = TreeRowLayout()
+            self.tree_row_layouts += [new_tree_row_layout]
+            new_tree_row_layout.add_widget(root_leaf)
+            new_tree_row_layout.resizeAfterChildren()
+            self.tree_scroll.tree_layout.add_widget(new_tree_row_layout)
+            self.tree_scroll.tree_layout.resizeAfterChildren()
+            return
+        for row in self.data['back']['tree'].front_tree_map:
+            new_tree_row_layout = TreeRowLayout()
+            for back_leaf_i in row:
+
+
+                front_leaf_i = len(self.leaves)
+
+                if type(back_leaf_i) == int:
+                    is_cur_board = self.data['back']['tree'].leaves[back_leaf_i].is_cur_board
+                    if back_leaf_i == 0:
+                        new_leaf = RootLeaf(front_leaf_i, is_cur_board=is_cur_board)
+                    else:
+                        new_leaf = StoneLeaf(front_leaf_i, back_leaf_i, self.data['back']['tree'].leaves[back_leaf_i].stone_color, is_cur_board=is_cur_board)
+
+                elif back_leaf_i in ['|', 'L', 'T']:
+                    new_leaf = BranchLeaf(front_leaf_i, back_leaf_i)
+                else:
+                    new_leaf = EmptyLeaf(front_leaf_i)
+
+                self.leaves += [new_leaf]
+                new_tree_row_layout.add_widget(new_leaf)
+            new_tree_row_layout.resizeAfterChildren()
+            self.tree_scroll.tree_layout.add_widget(new_tree_row_layout)
+            self.tree_row_layouts += [new_tree_row_layout]
+        self.tree_scroll.tree_layout.resizeAfterChildren()
+
+
+
 class TreeScroll(ScrollView, util.Helper):
     def __init__(self):
         super(TreeScroll, self).__init__()
@@ -60,7 +106,6 @@ class TreeScroll(ScrollView, util.Helper):
         self.bar_width = util.SCROLL_BAR_WIDTH_SECONDARY
         self.bar_color = util.CLR_PRISMARINE
         self.bar_inactive_color = util.CLR_PRISMARINE
-
         self.tree_layout = TreeLayout()
         self.add_widget(self.tree_layout)
 
@@ -90,11 +135,11 @@ class TreeLayout(BoxLayout, util.Helper):
 
         #####  \/  MANUAL LEAF LAYOUT FOR TESTING
 
-        self.tree_row_layout_1 = TreeRowLayout()
-        self.add_widget(self.tree_row_layout_1)
-
-        self.tree_row_layout_1.root_leaf = RootLeaf()
-        self.tree_row_layout_1.add_widget(self.tree_row_layout_1.root_leaf)
+        # self.tree_row_layout_1 = TreeRowLayout()
+        # self.add_widget(self.tree_row_layout_1)
+        #
+        # self.tree_row_layout_1.root_leaf = RootLeaf()
+        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.root_leaf)
 
         # self.tree_row_layout_1.stone_leaf_1 = StoneLeaf('b')
         # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_1)
@@ -132,7 +177,7 @@ class TreeLayout(BoxLayout, util.Helper):
         # self.tree_row_layout_1.stone_leaf_12 = StoneLeaf('w')
         # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_12)
 
-        self.tree_row_layout_1.resizeAfterChildren()
+        # self.tree_row_layout_1.resizeAfterChildren()
 
         # self.tree_row_layout_2 = TreeRowLayout()
         # self.add_widget(self.tree_row_layout_2)
@@ -207,7 +252,7 @@ class TreeLayout(BoxLayout, util.Helper):
         #####  /\  MANUAL LEAF LAYOUT FOR TESTING
 
         # Forces children to top instead of bottom.
-        self.add_widget(Widget())
+        # self.add_widget(Widget())
 
     def resizeAfterChildren(self) -> None:
         self.height = 40 * len(self.children)
@@ -230,21 +275,50 @@ class TreeRowLayout(BoxLayout, util.Helper):
 
 
 class Leaf(ButtonBehavior, Widget, util.Helper):
-    def __init__(self):
+    def __init__(self, front_leaf_i:int):
         super(Leaf, self).__init__()
+        self.front_leaf_i = front_leaf_i
         self.size_hint = [None, None]
         self.size = [40, 40]
 
+    #     self.setAndAddLeafCanvasBeforeObjs()
+    #     self.updateLeafDisplay()
+    #     self.bind(pos=self.updateLeafDisplay, size=self.updateLeafDisplay)
+    #     self.setIsCurBoard(is_cur_board)
+    #
+    # def setAndAddLeafCanvasBeforeObjs(self) -> None:
+    #     # print(f"\nIS THIS HAPPENING!?!?!\n")
+    #
+    #     # with self.canvas.before:
+    #     with self.canvas.after:
+    #
+    #         self.is_cur_board_rect_color = Color(*util.CLR_BOARD_YELLOW)
+    #         self.is_cur_board_rect = Rectangle()
+    #
+    # def updateLeafDisplay(self, *args) -> None:
+    #     self.is_cur_board_rect.pos = self.pos
+    #     self.is_cur_board_rect.size = self.size
+    #
+    # def setIsCurBoard(self, is_cur_board:bool=True) -> None:
+    #     self.is_cur_board = is_cur_board
+    #     if self.is_cur_board:  self.is_cur_board_rect_color.rgba = util.CLR_BOARD_YELLOW
+    #     else:  self.is_cur_board_rect_color.rgba = util.CLR_NOTHING
+
 
 class RootLeaf(Leaf):
-    def __init__(self):
-        super(RootLeaf, self).__init__()
+    def __init__(self, front_leaf_i:int, is_cur_board:bool=False):
+        super(RootLeaf, self).__init__(front_leaf_i)
+        self.leaf_type = 'root'
+        self.is_cur_board = is_cur_board
+        self.is_cur_board_color = util.CLR_BOARD_YELLOW if self.is_cur_board else util.CLR_NOTHING
         self.setAndAddCanvasBeforeObjs()
         self.updateDisplay()
         self.bind(pos=self.updateDisplay, size=self.updateDisplay)
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
+            self.is_cur_board_rect_color = Color(*self.is_cur_board_color)
+            self.is_cur_board_rect = Rectangle()
             self.tl_stone_color = Color(*util.CLR_BLACK)
             self.tl_stone = Ellipse()
             self.tr_stone_color = Color(*util.CLR_WHITE)
@@ -255,6 +329,8 @@ class RootLeaf(Leaf):
             self.br_stone = Ellipse()
 
     def updateDisplay(self, *args) -> None:
+        self.is_cur_board_rect.pos = self.pos
+        self.is_cur_board_rect.size = self.size
         half = self.size[0] / 2
         self.tl_stone.pos = [self.pos[0], self.pos[1] + half]
         self.tl_stone.size = [half] * 2
@@ -267,8 +343,12 @@ class RootLeaf(Leaf):
 
 
 class StoneLeaf(Leaf):
-    def __init__(self, color:str):
-        super(StoneLeaf, self).__init__()
+    def __init__(self, front_leaf_i:int, back_leaf_i:int, color:str, is_cur_board:bool=False):
+        super(StoneLeaf, self).__init__(front_leaf_i)
+        self.leaf_type = 'stone'
+        self.is_cur_board = is_cur_board
+        self.is_cur_board_color = util.CLR_BOARD_YELLOW if self.is_cur_board else util.CLR_NOTHING
+        self.back_leaf_i = back_leaf_i
         self.color = util.CLR_BLACK if color == 'b' else util.CLR_WHITE
         self.setAndAddCanvasBeforeObjs()
         self.updateDisplay()
@@ -276,19 +356,24 @@ class StoneLeaf(Leaf):
 
     def setAndAddCanvasBeforeObjs(self) -> None:
         with self.canvas.before:
+            self.is_cur_board_rect_color = Color(*self.is_cur_board_color)
+            self.is_cur_board_rect = Rectangle()
             self.stone_color = Color(*self.color)
             self.stone = Ellipse()
 
     def updateDisplay(self, *args) -> None:
+        self.is_cur_board_rect.pos = self.pos
+        self.is_cur_board_rect.size = self.size
         self.stone.pos = self.pos
         self.stone.size = self.size
 
 
 class BranchLeaf(Leaf):
-    def __init__(self, type:str):
-        super(BranchLeaf, self).__init__()
+    def __init__(self, front_leaf_i:int, branch_type:str):
+        super(BranchLeaf, self).__init__(front_leaf_i)
+        self.leaf_type = 'branch'
         self.line_width = 1.1
-        self.type = type
+        self.branch_type = branch_type
         self.setAndAddCanvasBeforeObjs()
         self.setLineType()
         self.updateDisplay()
@@ -305,8 +390,8 @@ class BranchLeaf(Leaf):
 
     def setLineType(self) -> None:
         colors = [util.CLR_BOARD_YELLOW] * 3
-        if self.type == 'L':  colors[2] = util.CLR_NOTHING
-        elif self.type == '|':  colors[1] = util.CLR_NOTHING
+        if self.branch_type == 'L':  colors[2] = util.CLR_NOTHING
+        elif self.branch_type == '|':  colors[1] = util.CLR_NOTHING
         self.top_line_color.rgba = colors[0]
         self.right_line_color.rgba = colors[1]
         self.bottom_line_color.rgba = colors[2]
@@ -327,5 +412,5 @@ class BranchLeaf(Leaf):
 
 
 class EmptyLeaf(Leaf):
-    def __init__(self):
-        super(EmptyLeaf, self).__init__()
+    def __init__(self, front_leaf_i:int):
+        super(EmptyLeaf, self).__init__(front_leaf_i)

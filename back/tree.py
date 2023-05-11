@@ -77,12 +77,10 @@ def main() -> None:
 class Tree(util.Helper):
     def __init__(self):
         super(Tree, self).__init__()
-
         Logger.info(f"{NAME}: init Tree")
-
         if self.data:  board_pos = self.data['back']['board'].stones
         else:  board_pos = None
-        self.leaves = [Leaf(self, is_root=True, leaf_i=0, board_pos=board_pos)]
+        self.leaves = [Leaf(self, is_root=True, is_cur_board=True, back_leaf_i=0, board_pos=board_pos)]
         self.next_leaf = 1
         self.tree = {0: {}}
         self.front_tree_map = []
@@ -91,12 +89,10 @@ class Tree(util.Helper):
         cur_leaf = self.tree
         for leaf in path_to_parent:  cur_leaf = cur_leaf[leaf]
         cur_leaf[self.next_leaf] = {}
-
-        leaf_kwargs['leaf_i'] = self.next_leaf
-
+        leaf_kwargs['back_leaf_i'] = self.next_leaf
         self.leaves += [Leaf(self, **leaf_kwargs)]
-
         self.next_leaf += 1
+        self.refreshFrontTreeMap()
 
     def moveLeaf(self, path_to_parent:list[int], leaf:int, move:str) -> None:
         """ Move a leaf up, down, to top, or to bottom through its sibling list. """
@@ -126,10 +122,13 @@ class Tree(util.Helper):
         for leaf in path_to_parent[:-1]:  cur_leaf_2 = cur_leaf_2[leaf]
         cur_leaf_2[path_to_parent[-1]] = {k: cur_leaf[k] for k in new_keys}
 
+        self.refreshFrontTreeMap()
+
     def printLeaves(self) -> None:
         for leaf in self.leaves:
             print(f"\nis_root       = {leaf.is_root}")
-            print(f"leaf_i        = {leaf.leaf_i}")
+            print(f"is_cur_board  = {leaf.is_cur_board}")
+            print(f"leaf_i        = {leaf.back_leaf_i}")
             print(f"parent_leaf_i = {leaf.parent_leaf_i}")
             print(f"move_count    = {leaf.move_count}")
             print(f"stone_color   = {leaf.stone_color}")
@@ -195,7 +194,11 @@ class Leaf(util.Helper):
         self,
         tree:Tree,
         is_root:bool=False,
-        leaf_i:int=None,
+
+        back_leaf_i:int=None,
+        front_leaf_i:int=None,
+        is_cur_board:bool=None,
+
         stone_color:str=None,
         move_count:int=None,
         stone_pos:list[int]=None,
@@ -206,11 +209,13 @@ class Leaf(util.Helper):
     ):
 
         super(Leaf, self).__init__()
-        Logger.info(f"{NAME}: init Leaf {leaf_i}")
+        Logger.info(f"{NAME}: init Leaf {back_leaf_i}")
 
         self.tree = tree
         self.is_root = is_root
-        self.leaf_i = leaf_i
+        self.back_leaf_i = back_leaf_i
+        self.front_leaf_i = front_leaf_i
+        self.is_cur_board = is_cur_board
         self.stone_color = stone_color
         self.stone_char = back_board.SETTINGS['black_char'] if self.stone_color == 'b' else back_board.SETTINGS['white_char']
         self.move_count = move_count
@@ -222,6 +227,7 @@ class Leaf(util.Helper):
         self.children = []
 
         if self.is_root:
+            self.is_cur_board = is_cur_board
             self.move_count = 0
             self.stone_color = 'w'
             self.path_to_self = [0]
@@ -231,23 +237,10 @@ class Leaf(util.Helper):
 
         self.parent_leaf_i = parent_leaf_i
         self.path_to_parent = self.tree.leaves[self.parent_leaf_i].path_to_self
-        self.path_to_self = self.path_to_parent + [self.leaf_i]
+        self.path_to_self = self.path_to_parent + [self.back_leaf_i]
         self.sibling_i = len(self.tree.leaves[self.parent_leaf_i].children)
 
-        self.tree.leaves[self.parent_leaf_i].children += [self.leaf_i]
-
-
-        # self.children = None
-        # self.leaf_i = None
-        #
-        # self.cur_board_pos = None
-        # self.coord = None
-        # self.y = None
-        # self.x = None
-        # self.color = None
-        # self.char = None
-        # self.move_number = None
-        # self.path_from_root = None
+        self.tree.leaves[self.parent_leaf_i].children += [self.back_leaf_i]
 
 
 ####################################################################################################
