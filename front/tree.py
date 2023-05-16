@@ -55,6 +55,9 @@ class Tree(BoxLayout, util.Helper):
         ]
 
     def refreshLayout(self) -> None:
+
+        # TODO:  clean up!!!
+
         self.tree_scroll.tree_layout.clear_widgets()
         self.tree_row_layouts = []
         self.leaves = []
@@ -135,124 +138,7 @@ class TreeLayout(BoxLayout, util.Helper):
 
         #####  \/  MANUAL LEAF LAYOUT FOR TESTING
 
-        # self.tree_row_layout_1 = TreeRowLayout()
-        # self.add_widget(self.tree_row_layout_1)
-        #
-        # self.tree_row_layout_1.root_leaf = RootLeaf()
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.root_leaf)
-
-        # self.tree_row_layout_1.stone_leaf_1 = StoneLeaf('b')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_1)
-        #
-        # self.tree_row_layout_1.stone_leaf_2 = StoneLeaf('w')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_2)
-        #
-        # self.tree_row_layout_1.stone_leaf_3 = StoneLeaf('b')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_3)
-        #
-        # self.tree_row_layout_1.stone_leaf_4 = StoneLeaf('w')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_4)
-        #
-        # self.tree_row_layout_1.stone_leaf_5 = StoneLeaf('b')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_5)
-        #
-        # self.tree_row_layout_1.stone_leaf_6 = StoneLeaf('w')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_6)
-        #
-        # self.tree_row_layout_1.stone_leaf_7 = StoneLeaf('b')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_7)
-        #
-        # self.tree_row_layout_1.stone_leaf_8 = StoneLeaf('w')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_8)
-        #
-        # self.tree_row_layout_1.stone_leaf_9 = StoneLeaf('b')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_9)
-        #
-        # self.tree_row_layout_1.stone_leaf_10 = StoneLeaf('w')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_10)
-        #
-        # self.tree_row_layout_1.stone_leaf_11 = StoneLeaf('b')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_11)
-        #
-        # self.tree_row_layout_1.stone_leaf_12 = StoneLeaf('w')
-        # self.tree_row_layout_1.add_widget(self.tree_row_layout_1.stone_leaf_12)
-
-        # self.tree_row_layout_1.resizeAfterChildren()
-
-        # self.tree_row_layout_2 = TreeRowLayout()
-        # self.add_widget(self.tree_row_layout_2)
-        #
-        # self.tree_row_layout_2.branch_leaf_1 = BranchLeaf('|')
-        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.branch_leaf_1)
-        #
-        # self.tree_row_layout_2.empty_leaf_2 = EmptyLeaf()
-        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.empty_leaf_2)
-        #
-        # self.tree_row_layout_2.empty_leaf_3 = EmptyLeaf()
-        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.empty_leaf_3)
-        #
-        # self.tree_row_layout_2.branch_leaf_2 = BranchLeaf('L')
-        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.branch_leaf_2)
-        #
-        # self.tree_row_layout_2.stone_leaf_1 = StoneLeaf('w')
-        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.stone_leaf_1)
-        #
-        # self.tree_row_layout_2.stone_leaf_2 = StoneLeaf('b')
-        # self.tree_row_layout_2.add_widget(self.tree_row_layout_2.stone_leaf_2)
-        #
-        # self.tree_row_layout_2.resizeAfterChildren()
-        #
-        # self.tree_row_layout_3 = TreeRowLayout()
-        # self.add_widget(self.tree_row_layout_3)
-        #
-        # self.tree_row_layout_3.branch_leaf_1 = BranchLeaf('T')
-        # self.tree_row_layout_3.add_widget(self.tree_row_layout_3.branch_leaf_1)
-        #
-        # self.tree_row_layout_3.stone_leaf_1 = StoneLeaf('b')
-        # self.tree_row_layout_3.add_widget(self.tree_row_layout_3.stone_leaf_1)
-        #
-        # self.tree_row_layout_3.stone_leaf_2 = StoneLeaf('w')
-        # self.tree_row_layout_3.add_widget(self.tree_row_layout_3.stone_leaf_2)
-        #
-        # self.tree_row_layout_3.resizeAfterChildren()
-        #
-        # self.tree_row_layout_4 = TreeRowLayout()
-        # self.add_widget(self.tree_row_layout_4)
-        #
-        # self.tree_row_layout_4.branch_leaf_1 = BranchLeaf('|')
-        # self.tree_row_layout_4.add_widget(self.tree_row_layout_4.branch_leaf_1)
-        #
-        # self.tree_row_layout_4.branch_leaf_2 = BranchLeaf('L')
-        # self.tree_row_layout_4.add_widget(self.tree_row_layout_4.branch_leaf_2)
-        #
-        # self.tree_row_layout_4.stone_leaf_1 = StoneLeaf('w')
-        # self.tree_row_layout_4.add_widget(self.tree_row_layout_4.stone_leaf_1)
-        #
-        # self.tree_row_layout_4.resizeAfterChildren()
-        #
-        # self.tree_row_layout_5 = TreeRowLayout()
-        # self.add_widget(self.tree_row_layout_5)
-        #
-        # self.tree_row_layout_5.branch_leaf_1 = BranchLeaf('L')
-        # self.tree_row_layout_5.add_widget(self.tree_row_layout_5.branch_leaf_1)
-        #
-        # self.tree_row_layout_5.stone_leaf_1 = StoneLeaf('b')
-        # self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_1)
-        #
-        # self.tree_row_layout_5.stone_leaf_2 = StoneLeaf('w')
-        # self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_2)
-        #
-        # self.tree_row_layout_5.stone_leaf_3 = StoneLeaf('b')
-        # self.tree_row_layout_5.add_widget(self.tree_row_layout_5.stone_leaf_3)
-        #
-        # self.tree_row_layout_5.resizeAfterChildren()
-        #
-        # self.resizeAfterChildren()
-
         #####  /\  MANUAL LEAF LAYOUT FOR TESTING
-
-        # Forces children to top instead of bottom.
-        # self.add_widget(Widget())
 
     def resizeAfterChildren(self) -> None:
         self.height = 40 * len(self.children)
@@ -282,6 +168,8 @@ class Leaf(ButtonBehavior, Widget, util.Helper):
         self.size = [40, 40]
 
     def on_release(self) -> None:
+
+        # TODO:  clean up!!!
 
         # print(f"\n{dir(self.app.main_window) = }\n")
 

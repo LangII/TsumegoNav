@@ -1,8 +1,5 @@
 
 
-####################################################################################################
-
-
 from __future__ import annotations
 import sys
 new_path = __file__
@@ -30,37 +27,6 @@ NAME = util.getNameFromFile(__file__)
 def main() -> None:
 
     tree = Tree()
-    tree.tree = {
-        0: {
-            1: {
-                2: {
-                    3: {
-                        4: {
-                            5: {
-                                16: {
-                                    17: {},
-                                },
-                            },
-                        },
-                    },
-                    8: {},
-                    9: {
-                        10: {},
-                    },
-                },
-            },
-            6: {
-                12: {
-                    14: {},
-                    15: {},
-                },
-                13: {},
-            },
-            7: {
-                11: {},
-            },
-        },
-    }
 
     print(f"\n{tree.tree = }")
 
@@ -126,15 +92,19 @@ class Tree(util.Helper):
 
     def printLeaves(self) -> None:
         for leaf in self.leaves:
-            print(f"\nis_root       = {leaf.is_root}")
-            print(f"is_cur_board  = {leaf.is_cur_board}")
-            print(f"leaf_i        = {leaf.back_leaf_i}")
-            print(f"parent_leaf_i = {leaf.parent_leaf_i}")
-            print(f"move_count    = {leaf.move_count}")
-            print(f"stone_color   = {leaf.stone_color}")
-            print(f"stone_pos     = {leaf.stone_pos}")
-            print(f"board_pos     = {leaf.board_pos}")
-            print(f"children      = {leaf.children}")
+            print(f"\nis_root        = {leaf.is_root}")
+            print(f"back_leaf_i    = {leaf.back_leaf_i}")
+            print(f"front_leaf_i   = {leaf.front_leaf_i}")
+            print(f"parent_leaf_i  = {leaf.parent_leaf_i}")
+            print(f"is_cur_board   = {leaf.is_cur_board}")
+            print(f"move_count     = {leaf.move_count}")
+            print(f"stone_color    = {leaf.stone_color}")
+            print(f"stone_pos      = {leaf.stone_pos}")
+            print(f"board_pos      = {leaf.board_pos}")
+            print(f"children       = {leaf.children}")
+            print(f"path_to_parent = {leaf.path_to_parent}")
+            print(f"path_to_self   = {leaf.path_to_self}")
+            print(f"sibling_i      = {leaf.sibling_i}")
 
     def printTree(self) -> None:
         print(f"\n{self.tree = }")
@@ -194,23 +164,19 @@ class Leaf(util.Helper):
         self,
         tree:Tree,
         is_root:bool=False,
-
         back_leaf_i:int=None,
         front_leaf_i:int=None,
+        parent_leaf_i:int=None,
         is_cur_board:bool=None,
-
         stone_color:str=None,
         move_count:int=None,
         stone_pos:list[int]=None,
         board_pos:dict[list[list]]=None,
         ko:list[int]=None,
         captures:dict[int]=None,
-        parent_leaf_i:int=None
     ):
-
         super(Leaf, self).__init__()
         Logger.info(f"{NAME}: init Leaf {back_leaf_i}")
-
         self.tree = tree
         self.is_root = is_root
         self.back_leaf_i = back_leaf_i
@@ -223,24 +189,22 @@ class Leaf(util.Helper):
         self.board_pos = board_pos
         self.ko = ko
         self.captures = captures
-
         self.children = []
-
         if self.is_root:
-            self.is_cur_board = is_cur_board
             self.move_count = 0
             self.stone_color = 'w'
-            self.path_to_self = [0]
             self.parent_leaf_i = None
             self.stone_pos = None
-            return
-
-        self.parent_leaf_i = parent_leaf_i
-        self.path_to_parent = self.tree.leaves[self.parent_leaf_i].path_to_self
-        self.path_to_self = self.path_to_parent + [self.back_leaf_i]
-        self.sibling_i = len(self.tree.leaves[self.parent_leaf_i].children)
-
-        self.tree.leaves[self.parent_leaf_i].children += [self.back_leaf_i]
+            self.path_to_parent = None
+            self.path_to_self = [0]
+            self.sibling_i = None
+        else:
+            self.parent_leaf_i = parent_leaf_i
+            self.path_to_parent = self.tree.leaves[self.parent_leaf_i].path_to_self
+            self.path_to_self = self.path_to_parent + [self.back_leaf_i]
+            self.sibling_i = len(self.tree.leaves[self.parent_leaf_i].children)
+            # populate 'children' of parent leaf
+            self.tree.leaves[self.parent_leaf_i].children += [self.back_leaf_i]
 
 
 ####################################################################################################
