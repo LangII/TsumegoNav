@@ -59,7 +59,7 @@ class Tree(BoxLayout, util.Helper):
         self.tree_row_layouts = []
         self.leaves = []
         if not self.data['back']['tree'].front_tree_map:
-            root_leaf = RootLeaf(0, is_cur_board=True)
+            root_leaf = RootLeaf(0, 0, is_cur_board=True)
             self.leaves += [root_leaf]
             new_tree_row_layout = TreeRowLayout()
             self.tree_row_layouts += [new_tree_row_layout]
@@ -78,7 +78,7 @@ class Tree(BoxLayout, util.Helper):
                 if type(back_leaf_i) == int:
                     is_cur_board = self.data['back']['tree'].leaves[back_leaf_i].is_cur_board
                     if back_leaf_i == 0:
-                        new_leaf = RootLeaf(front_leaf_i, is_cur_board=is_cur_board)
+                        new_leaf = RootLeaf(front_leaf_i, back_leaf_i, is_cur_board=is_cur_board)
                     else:
                         new_leaf = StoneLeaf(front_leaf_i, back_leaf_i, self.data['back']['tree'].leaves[back_leaf_i].stone_color, is_cur_board=is_cur_board)
 
@@ -281,34 +281,47 @@ class Leaf(ButtonBehavior, Widget, util.Helper):
         self.size_hint = [None, None]
         self.size = [40, 40]
 
-    #     self.setAndAddLeafCanvasBeforeObjs()
-    #     self.updateLeafDisplay()
-    #     self.bind(pos=self.updateLeafDisplay, size=self.updateLeafDisplay)
-    #     self.setIsCurBoard(is_cur_board)
-    #
-    # def setAndAddLeafCanvasBeforeObjs(self) -> None:
-    #     # print(f"\nIS THIS HAPPENING!?!?!\n")
-    #
-    #     # with self.canvas.before:
-    #     with self.canvas.after:
-    #
-    #         self.is_cur_board_rect_color = Color(*util.CLR_BOARD_YELLOW)
-    #         self.is_cur_board_rect = Rectangle()
-    #
-    # def updateLeafDisplay(self, *args) -> None:
-    #     self.is_cur_board_rect.pos = self.pos
-    #     self.is_cur_board_rect.size = self.size
-    #
-    # def setIsCurBoard(self, is_cur_board:bool=True) -> None:
-    #     self.is_cur_board = is_cur_board
-    #     if self.is_cur_board:  self.is_cur_board_rect_color.rgba = util.CLR_BOARD_YELLOW
-    #     else:  self.is_cur_board_rect_color.rgba = util.CLR_NOTHING
+    def on_release(self) -> None:
+
+        # print(f"\n{dir(self.app.main_window) = }\n")
+
+        self.app.main_window.main_scroll.main_scroll_layout.board.resetBoard(
+            self.data['back']['tree'].leaves[self.back_leaf_i].board_pos
+        )
+
+        for leaf in self.data['back']['tree'].leaves:
+            if leaf.is_cur_board:  leaf.is_cur_board = False  ;  break
+
+        self.data['back']['tree'].leaves[self.back_leaf_i].is_cur_board = True
+
+        self.app.main_window.main_scroll.main_scroll_layout.tree.refreshLayout()
+
+        self.data['input']['tree_options']['cur_back_leaf_i'] = self.back_leaf_i
+
+        # print(f"\n{self.color_text = }\n")
+
+        if self.leaf_type == 'stone':
+            cur_stone_button_color = 'b' if self.color_text == 'w' else 'w'
+        elif self.leaf_type == 'root':
+            color = self.data['back']['tree'].leaves[self.back_leaf_i].stone_color
+            cur_stone_button_color  = 'b' if color == 'w' else 'w'
+
+        if self.data['input']['board_options']['next_stone_state'] == 'alternate':
+            next_stone_button_color = 'b' if cur_stone_button_color == 'w' else 'w'
+        else:
+            next_stone_button_color = cur_stone_button_color
+
+
+        self.app.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.cur_stone_button.setColor(cur_stone_button_color)
+        self.app.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.next_stone_button.setColor(next_stone_button_color)
+
 
 
 class RootLeaf(Leaf):
-    def __init__(self, front_leaf_i:int, is_cur_board:bool=False):
+    def __init__(self, front_leaf_i:int, back_leaf_i:int, is_cur_board:bool=False):
         super(RootLeaf, self).__init__(front_leaf_i)
         self.leaf_type = 'root'
+        self.back_leaf_i = back_leaf_i
         self.is_cur_board = is_cur_board
         self.is_cur_board_color = util.CLR_BOARD_YELLOW if self.is_cur_board else util.CLR_NOTHING
         self.setAndAddCanvasBeforeObjs()
@@ -349,6 +362,7 @@ class StoneLeaf(Leaf):
         self.is_cur_board = is_cur_board
         self.is_cur_board_color = util.CLR_BOARD_YELLOW if self.is_cur_board else util.CLR_NOTHING
         self.back_leaf_i = back_leaf_i
+        self.color_text = color
         self.color = util.CLR_BLACK if color == 'b' else util.CLR_WHITE
         self.setAndAddCanvasBeforeObjs()
         self.updateDisplay()
@@ -366,6 +380,7 @@ class StoneLeaf(Leaf):
         self.is_cur_board_rect.size = self.size
         self.stone.pos = self.pos
         self.stone.size = self.size
+
 
 
 class BranchLeaf(Leaf):

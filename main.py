@@ -7,12 +7,18 @@ TURNOVER NOTES:
 - Next to do is make a board.  Review board from GoCalc for references...  Good luck!
 
 2023-05-11
+
 - Doing very good at building Front Tree and making it interactive with Front Board, Back Board, and
 Back Tree.  "Doing very good", yes functional, but still very dirty.  Need to clean!
+
+DONE
 - Next is make it so user can click on Leaves in Front Tree and have the Front Board update to the
 board position of the Front Tree Leaf clicked on.
+DONE
+
 - Then update Front Board so a Symbol appears on Stone of 'stone_pos' of Front Tree Cur Leaf.  Be
 sure to make Symbol dynamic.
+
 - Also need to make it so that if on a Leaf that already has children leaves, the user can click
 on a Front Board position that is already a child, and the Front Board and Front Tree, instead of
 creating a new Leaf, will just take the user to Leaf of clicked board position.

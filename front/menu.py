@@ -108,11 +108,11 @@ class CurNextStoneButton(ButtonBehavior, Widget, util.Helper):
     def setColor(self, color:str) -> None:
         self.data['input']['board_options'][self.option] = color
         self.color = color
-        self.stone_color.rgba = util.CLR_BLACK if color == 'black' else util.CLR_WHITE
+        self.stone_color.rgba = util.CLR_BLACK if color in ['black', 'b'] else util.CLR_WHITE
 
     def cycleColor(self) -> None:
-        if self.color == 'black':  self.setColor('white')
-        elif self.color == 'white':  self.setColor('black')
+        if self.color in ['black', 'b']:  self.setColor('w')
+        elif self.color in ['white', 'w']:  self.setColor('b')
 
 
 class CurStoneButton(CurNextStoneButton):
