@@ -158,6 +158,11 @@ class Tree(util.Helper):
         for row in front_tree_map:  print(f"\t{' '.join(row)}")
         print("]")
 
+    def updateLeavesIsCurBoard(self, new_is_cur_board_leaf_i:int) -> None:
+        for leaf in self.leaves:
+            if leaf.is_cur_board:  leaf.is_cur_board = False  ;  break
+        self.leaves[new_is_cur_board_leaf_i].is_cur_board = True
+
 
 class Leaf(util.Helper):
     def __init__(

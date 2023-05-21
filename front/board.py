@@ -11,6 +11,7 @@ from kivy.properties import ListProperty
 from kivy.graphics import Color, Line, Rectangle, Ellipse
 
 import util
+from back.tree import Leaf as BackLeaf
 
 
 ####################################################################################################
@@ -147,44 +148,37 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
         self.stone_color.rgba = util.CLR_BLACK if color in ['b', 'black'] else util.CLR_WHITE
         self.stone_line_color.rgba = util.CLR_BLACK
 
-    def on_release(self) -> None:
-
-        # TODO:  clean up!!!
-
-        if self.cur_stone == 'no':
-
-            back_leaves = self.data['back']['tree'].leaves
-            cur_back_leaf = back_leaves[self.data['input']['tree_options']['cur_back_leaf_i']]
-
-            cur_back_leaf.is_cur_board = False
-
-            leaf_kwargs = {
-                'stone_color': 'b' if cur_back_leaf.stone_color == 'w' else 'w',
+    def getBackTreeAddLeafKwargs(self, cur_back_leaf:BackLeaf) -> dict:
+        stone_color = 'b' if cur_back_leaf.stone_color == 'w' else 'w'
+        add_leaf_kwargs = {
+            'path_to_parent': cur_back_leaf.path_to_self,
+            'leaf_kwargs': {
+                'stone_color': stone_color,
                 'move_count': cur_back_leaf.move_count + 1,
                 'stone_pos': self.coord,
                 'parent_leaf_i': cur_back_leaf.back_leaf_i,
-
                 'is_cur_board': True,
-
             }
-            leaf_kwargs['board_pos'] = deepcopy(cur_back_leaf.board_pos)
-            leaf_kwargs['board_pos'][leaf_kwargs['stone_color']] += [leaf_kwargs['stone_pos']]
+        }
+        add_leaf_kwargs['leaf_kwargs']['board_pos'] = deepcopy(cur_back_leaf.board_pos)
+        add_leaf_kwargs['leaf_kwargs']['board_pos'][stone_color] += [self.coord]
+        return add_leaf_kwargs
 
+    def on_release(self) -> None:
+        if self.cur_stone == 'no':
+            # get current backend leaf
+            cur_back_leaf = self.data['back']['tree'].leaves[self.data['input']['tree_options']['cur_back_leaf_i']]
+            # update 'main' 'data' (after previously collecting 'main' 'data')
             self.data['input']['tree_options']['cur_back_leaf_i'] = self.data['back']['tree'].next_leaf
-
-            print(f"\n{leaf_kwargs = }\n")
-            print(f"\n{cur_back_leaf.path_to_self = }\n")
-
-            self.data['back']['tree'].addLeaf(
-                path_to_parent=cur_back_leaf.path_to_self, leaf_kwargs=leaf_kwargs,
-            )
-
+            # update current backend leaf
+            cur_back_leaf.is_cur_board = False
+            # update backend tree with addLeaf()
+            self.data['back']['tree'].addLeaf(**self.getBackTreeAddLeafKwargs(cur_back_leaf))
+            # refresh frontend tree layout
             self.parent.parent.tree.refreshLayout()
-
             self.setStoneColor()
             if self.data['input']['board_options']['next_stone_state'] == 'alternate':
                 self.cycleCurNextStoneButtons()
-
         elif self.cur_stone == self.data['input']['board_options']['cur_stone']:
             self.setToNoStone()
         else:

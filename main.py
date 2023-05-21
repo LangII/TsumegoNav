@@ -1,6 +1,33 @@
 
 
 """
+The design of this App is inspired by https://tsumego.tasuki.org/.  A tsumego collection that
+intentionally provides no solutions.  The reason is that it is believed you get stronger by solving
+and then doing the work to verify the solution for yourself, rather than by solving and just simply
+confirming.
+
+Yes, this method of studying tsumego did prove to be more advantageous for me personally.  But, the
+process of solving was noticeably more time consuming.  I felt that there was the potential for a
+player to become stronger faster, if they studied tsumego via this method AND had a convenient
+time saving tool to do so.  That is the purpose of this App:  To make studying solutionless-tsumego
+easier and faster.
+
+---
+
+"It is a matter of life and death, a road either to safety or to ruin.  Hence it is a subject of
+inquiry which can on no account be neglected."
+- Sun Tzu:  The Art of War
+
+"The problems come without solutions for two reasons:  first, one can learn more by reading out all
+the paths and solving the problems oneself; second, the solutions are copyrighted."
+- Vit Brunner
+
+"Don't look at the solutions!!!"
+- Benjamin Teuber
+"""
+
+
+"""
 TURNOVER NOTES:
 
 2023-03-17
