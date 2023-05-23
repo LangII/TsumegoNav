@@ -1,5 +1,7 @@
 
 
+from __future__ import annotations
+
 from kivy.logger import Logger
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
@@ -93,6 +95,9 @@ class Tree(BoxLayout, util.Helper):
     def createNewLeaf(self, back_leaf_i:int, front_leaf_i:int) -> Leaf:
         # for stone leaves
         if type(back_leaf_i) == int:
+
+            self.data['back']['tree'].leaves[back_leaf_i].front_leaf_i = front_leaf_i
+
             is_cur_board = self.data['back']['tree'].leaves[back_leaf_i].is_cur_board
             if back_leaf_i == 0:
                 new_leaf = RootLeaf(front_leaf_i, back_leaf_i, is_cur_board=is_cur_board)

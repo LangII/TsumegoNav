@@ -166,17 +166,53 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
 
     def on_release(self) -> None:
         if self.cur_stone == 'no':
-            # get current backend leaf
-            cur_back_leaf = self.data['back']['tree'].leaves[self.data['input']['tree_options']['cur_back_leaf_i']]
-            # update 'main' 'data' (after previously collecting 'main' 'data')
-            self.data['input']['tree_options']['cur_back_leaf_i'] = self.data['back']['tree'].next_leaf
-            # update current backend leaf
-            cur_back_leaf.is_cur_board = False
-            # update backend tree with addLeaf()
-            self.data['back']['tree'].addLeaf(**self.getBackTreeAddLeafKwargs(cur_back_leaf))
-            # refresh frontend tree layout
-            self.parent.parent.tree.refreshLayout()
-            self.setStoneColor()
+
+
+
+            """ check and see if 'self.coord' is in 'self.data['back']['tree'].leaves[].stone_pos' """
+
+            # siblings = self.data['back']['tree'].leaves[self.data['input']['tree_options']['cur_back_leaf_i']].children
+
+            # if self.coord in [self.data['back']['tree'].leaves[s].stone_pos for s in siblings]:
+
+            back_leaf = self.data['back']['tree'].leaves[self.data['input']['tree_options']['cur_back_leaf_i']]
+
+            if self.coord in [self.data['back']['tree'].leaves[c].stone_pos for c in back_leaf.children]:
+
+                print("has already been selected")
+
+                """
+                1. find front leaf of selected board pos.
+                2. call ^ front leaf's 'on_release' func
+                """
+
+                selected_back_leaf = None
+                for c in back_leaf.children:
+                    if self.coord == self.data['back']['tree'].leaves[c].stone_pos:
+                        selected_back_leaf = self.data['back']['tree'].leaves[c]
+                        break
+
+                front_leaf = self.app.main_window.main_scroll.main_scroll_layout.tree.leaves[selected_back_leaf.front_leaf_i]
+
+                front_leaf.on_release()
+
+                # front_leaf = None
+                # for leaf in self.app.main_window.main_scroll.main_scroll_layout.tree.leaves:
+                #     if
+
+            else:
+                # get current backend leaf
+                cur_back_leaf = self.data['back']['tree'].leaves[self.data['input']['tree_options']['cur_back_leaf_i']]
+                # update 'main' 'data' (after previously collecting 'main' 'data')
+                self.data['input']['tree_options']['cur_back_leaf_i'] = self.data['back']['tree'].next_leaf
+                # update current backend leaf
+                cur_back_leaf.is_cur_board = False
+                # update backend tree with addLeaf()
+                self.data['back']['tree'].addLeaf(**self.getBackTreeAddLeafKwargs(cur_back_leaf))
+                # refresh frontend tree layout
+                self.parent.parent.tree.refreshLayout()
+                self.setStoneColor()
+
             if self.data['input']['board_options']['next_stone_state'] == 'alternate':
                 self.cycleCurNextStoneButtons()
         elif self.cur_stone == self.data['input']['board_options']['cur_stone']:

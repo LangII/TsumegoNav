@@ -46,9 +46,15 @@ DONE
 - Then update Front Board so a Symbol appears on Stone of 'stone_pos' of Front Tree Cur Leaf.  Be
 sure to make Symbol dynamic.
 
+IN REVIEW / CLEAN UP
 - Also need to make it so that if on a Leaf that already has children leaves, the user can click
 on a Front Board position that is already a child, and the Front Board and Front Tree, instead of
 creating a new Leaf, will just take the user to Leaf of clicked board position.
+IN REVIEW / CLEAN UP
+
+2023-05-22
+
+- Implement the use of back board for illegal moves.
 """
 
 
