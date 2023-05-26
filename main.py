@@ -211,13 +211,6 @@ class MainApp(App):
 
             self.data['input']['tree_options']['cur_back_leaf_i'] = next_leaf.back_leaf_i
 
-        """
-        2023-05-05
-        TURNOVER NOTES:
-        - So far so good.  Currently using keyboard keys to simulate the navigation of front tree.
-        - Next up is add functionality for 'w', 's', and 'd'.
-        """
-
     #####  /\  IN APP TESTING
 
 

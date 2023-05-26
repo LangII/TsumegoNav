@@ -96,13 +96,12 @@ class Tree(BoxLayout, util.Helper):
         # for stone leaves
         if type(back_leaf_i) == int:
 
+            # update partner back leaf at 1st possibility
             self.data['back']['tree'].leaves[back_leaf_i].front_leaf_i = front_leaf_i
 
             is_cur_board = self.data['back']['tree'].leaves[back_leaf_i].is_cur_board
-            if back_leaf_i == 0:
-                new_leaf = RootLeaf(front_leaf_i, back_leaf_i, is_cur_board=is_cur_board)
-            else:
-                new_leaf = StoneLeaf(front_leaf_i, back_leaf_i, self.data['back']['tree'].leaves[back_leaf_i].stone_color, is_cur_board=is_cur_board)
+            if back_leaf_i == 0:  new_leaf = RootLeaf(front_leaf_i, back_leaf_i, is_cur_board=is_cur_board)
+            else:  new_leaf = StoneLeaf(front_leaf_i, back_leaf_i, self.data['back']['tree'].leaves[back_leaf_i].stone_color, is_cur_board=is_cur_board)
         # for branch leaves
         elif back_leaf_i in ['|', 'L', 'T']:
             new_leaf = BranchLeaf(front_leaf_i, back_leaf_i)
