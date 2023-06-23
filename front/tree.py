@@ -93,6 +93,7 @@ class Tree(BoxLayout, util.Helper):
         self.tree_scroll.tree_layout.resizeAfterChildren()
 
     def createNewLeaf(self, back_leaf_i:int, front_leaf_i:int) -> Leaf:
+
         # for stone leaves
         if type(back_leaf_i) == int:
 
@@ -102,12 +103,12 @@ class Tree(BoxLayout, util.Helper):
             is_cur_board = self.data['back']['tree'].leaves[back_leaf_i].is_cur_board
             if back_leaf_i == 0:  new_leaf = RootLeaf(front_leaf_i, back_leaf_i, is_cur_board=is_cur_board)
             else:  new_leaf = StoneLeaf(front_leaf_i, back_leaf_i, self.data['back']['tree'].leaves[back_leaf_i].stone_color, is_cur_board=is_cur_board)
+
         # for branch leaves
-        elif back_leaf_i in ['|', 'L', 'T']:
-            new_leaf = BranchLeaf(front_leaf_i, back_leaf_i)
+        elif back_leaf_i in ['|', 'L', 'T']:  new_leaf = BranchLeaf(front_leaf_i, back_leaf_i)
         # for empty leaves
-        else:
-            new_leaf = EmptyLeaf(front_leaf_i)
+        else:  new_leaf = EmptyLeaf(front_leaf_i)
+
         return new_leaf
 
 
@@ -180,22 +181,6 @@ class Leaf(ButtonBehavior, Widget, util.Helper):
         self.size_hint = [None, None]
         self.size = [40, 40]
 
-    def on_release(self) -> None:
-        # verify leaf type
-        if self.leaf_type not in ['root', 'stone']:  return
-        # reset front board
-        self.app.main_window.main_scroll.main_scroll_layout.board.resetBoard(
-            self.data['back']['tree'].leaves[self.back_leaf_i].board_pos
-        )
-        # update 'is_cur_board'
-        self.data['back']['tree'].updateLeavesIsCurBoard(self.back_leaf_i)
-        # refresh frontend tree layout
-        self.app.main_window.main_scroll.main_scroll_layout.tree.refreshLayout()
-        # update 'main' 'data'
-        self.data['input']['tree_options']['cur_back_leaf_i'] = self.back_leaf_i
-
-        self.setBoardOptionsCurNextStoneButtons()
-
     def setBoardOptionsCurNextStoneButtons(self) -> None:
         # set cur_stone_button_color
         if self.leaf_type == 'stone':  color_source = self.color_text
@@ -207,6 +192,23 @@ class Leaf(ButtonBehavior, Widget, util.Helper):
         # call color setting funcs
         self.app.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.cur_stone_button.setColor(cur_sb_color)
         self.app.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.next_stone_button.setColor(next_sb_color)
+
+    def on_release(self) -> None:
+        # verify leaf type
+        if self.leaf_type not in ['root', 'stone']:  return
+        # reset front board
+        self.app.main_window.main_scroll.main_scroll_layout.board.resetBoard(
+            self.data['back']['tree'].leaves[self.back_leaf_i].board_pos,
+            include_back_board=True
+        )
+        # update 'is_cur_board'
+        self.data['back']['tree'].updateLeavesIsCurBoard(self.back_leaf_i)
+        # refresh frontend tree layout
+        self.app.main_window.main_scroll.main_scroll_layout.tree.refreshLayout()
+        # update 'main' 'data'
+        self.data['input']['tree_options']['cur_back_leaf_i'] = self.back_leaf_i
+
+        self.setBoardOptionsCurNextStoneButtons()
 
 
 class RootLeaf(Leaf):

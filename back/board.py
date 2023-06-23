@@ -7,6 +7,7 @@ for _ in range(2):  new_path = new_path[:new_path.rfind('/')]
 sys.path += [new_path]
 
 from copy import deepcopy
+import json
 
 from kivy.logger import Logger
 
@@ -31,6 +32,17 @@ SETTINGS = {
 
 
 def main():
+
+    back_board = Board()
+
+    back_board.resetBoard({
+        'b': [[2, 2], [2, 3], [2, 4], [2, 5], [1, 7], [2, 0], [0, 6],],
+        'w': [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5], ]
+    })
+
+    back_board.printVars()
+
+    back_board.printBoard()
 
     return
 
@@ -64,12 +76,26 @@ class Board(util.Helper):
             'color': None, 'opp_color': None, 'char': None, 'opp_char': None, 'coord': None,
             'y': None, 'x': None, 'temp_board': None, 'capturing_groups': None, 'makes_ko': None,
         }
-        self.resetBoard(self.data['input']['cur_problem'])
 
-    def printBoard(self) -> None:
+        if self.data:  self.resetBoard(self.data['input']['cur_problem'])
+
+    def printVars(self) -> None:
+        dont_print = ['board', 'board_pos_history', 'data', 'stones', 'app', 'play_data']
+        prints = {k: v for k, v in vars(self).items() if k not in dont_print}
+        print(f"\nback/board vars =\n{json.dumps(prints, indent=4, default=str)}")
+
+    def printBoard(self, with_coord:bool=True) -> None:
         print("")
-        for row in self.board:  print(' '.join(row))
-        print(f"{self.captures}")
+        if with_coord:
+            hor_coords = f"  {' '.join([str(x).rjust(2) for x in range(self.size)])}"
+            print(hor_coords)
+            for i, row in enumerate(self.board):
+                vert_coord = str(i).rjust(2)
+                print(f"{vert_coord}{' '.join([f' {x}' for x in row])} {vert_coord}")
+            print(hor_coords)
+        else:
+            for row in self.board:  print(' '.join(row))
+        print(self.captures)
 
     def resetBoard(self, presets:dict[list[list]]=None) -> None:
         presets = presets if presets else {}
@@ -81,14 +107,20 @@ class Board(util.Helper):
         self.setStones()
         self.setGroups()
 
-    def play(self, color:str, coord:list[int]) -> None:
+    def play(self, color:str, coord:list[int], only_test_legality:bool=False) -> None:
         self.play_data['color'] = color
         self.play_data['opp_color'] = 'b' if color == 'w' else 'w'
         self.play_data['char'] = self.black_char if color == 'b' else self.white_char
         self.play_data['opp_char'] = self.white_char if color == 'b' else self.black_char
         self.play_data['coord'] = coord
         self.play_data['y'], self.play_data['x'] = coord
-        if not self.playIsLegal():  self.resetPlayData()  ;  return
+
+        if only_test_legality:
+            legality, reason = self.playIsLegal()
+            self.resetPlayData()
+            return legality, reason
+
+        if not self.playIsLegal()[0]:  self.resetPlayData()  ;  return
         self.board[self.play_data['y']][self.play_data['x']] = self.play_data['char']
         self.setStones()
         self.setGroups()
@@ -100,21 +132,43 @@ class Board(util.Helper):
     def resetPlayData(self) -> None:
         for k in self.play_data.keys():  self.play_data[k] = None
 
-    def playIsLegal(self) -> bool:
+    # def kivyDeepCopyErrorWorkAround(self) -> dict:
+    #     attr_dict = vars(self)
+    #     del attr_dict['app']
+    #     print(f"\n{attr_dict = }\n")
+
+    def playIsLegal(self) -> tuple[bool, str]:
         # play is illegal because another stone is currently at that coord
-        if self.play_data['coord'] in self.stones['b'] + self.stones['w']:  return False
+        if self.play_data['coord'] in self.stones['b'] + self.stones['w']:  return False, 'occupied'
         # play is illegal due to ko
-        if self.board[self.play_data['y']][self.play_data['x']] == self.ko_char:  return False
+        if self.board[self.play_data['y']][self.play_data['x']] == self.ko_char:  return False, 'ko'
+
+        data, app = self.data, self.app
+        del self.data ; del self.app
         self.play_data['temp_board'] = deepcopy(self)
+        self.data, self.app = data, app
+
+        """
+        2023-05-26
+        TURNOVER NOTES:
+        
+        - Having an issue...  For some reason Kivy is throwing an odd error when using `deepcopy()`
+        on Kivy objects (or so it says).  I'm not 100% sure this is my problem because I just ^
+        removed the Kivy objects before deepcopy()-ing and I'm still having the same error.
+        
+            - 2nd thought...  Try removing (just comment out) all current/previous uses of
+            BackBoard.  Then start from scratch with BackBoard implementation.
+        """
+
         self.play_data['temp_board'].board[self.play_data['y']][self.play_data['x']] = self.play_data['char']
         self.play_data['temp_board'].setStones()
         self.play_data['temp_board'].setGroups()
         self.play_data['temp_board'].handleCapturesDuringPlay()
         # play is illegal due to suicide
-        if self.play_data['temp_board'].getGroupFromCoord(self.play_data['coord']).liberties_count == 0:  return False
+        if self.play_data['temp_board'].getGroupFromCoord(self.play_data['coord']).liberties_count == 0:  return False, 'suicide'
         # play is illegal due to true ko verification (board repeated)
-        if self.play_data['temp_board'].board in self.play_data['temp_board'].board_pos_history:  return False
-        return True
+        if self.play_data['temp_board'].board in self.play_data['temp_board'].board_pos_history:  return False, 'true ko'
+        return True, ''
 
     def handleCapturesDuringPlay(self) -> None:
         self.play_data['capturing_groups'] = [g for g in self.groups[self.play_data['opp_color']] if g.liberties_count == 0]
@@ -199,6 +253,29 @@ class Board(util.Helper):
                     if master_label == label:
                         stones_to_group += [self.stones[color][i]]
                 self.groups[color] += [Group(self, color, stones_to_group)]
+
+        """
+        # This is ChatGPT's "simplified" version of this method...  I'm actually pretty impressed.
+        # I'm keeping my original though because I think the logic flow of this function is very
+        # complicated, so I think the comments are required for reading.  And I also feel that due
+        # to its complexity, breaking down the comprehensions helps with readability.
+        self.groups = {'b': [], 'w': []}
+        for color, stones in self.stones.items():
+            if not stones:  continue
+            group_labels = [0] * len(stones)
+            new_label = 1
+            for i, stone in enumerate(stones):
+                if group_labels[i] == 0:
+                    group_labels[i] = new_label
+                    new_label += 1
+                for other_i, other_stone in enumerate(stones):
+                    if i == other_i:  continue
+                    if stone in self.getStoneNeighbors(other_stone) and group_labels[other_i] != 0:
+                        group_labels = [group_labels[other_i] if label == group_labels[i] else label for label in group_labels]
+            for master_label in set(group_labels):
+                stones_to_group = [self.stones[color][i] for i, label in enumerate(group_labels) if master_label == label]
+                self.groups[color] += [Group(self, color, stones_to_group)]
+        """
 
     def getStoneNeighbors(self, stone:list[int]) -> list[list[int]]:
         if type(stone) == 'str':  stone = util.convStrListCoordToListCoord(stone)

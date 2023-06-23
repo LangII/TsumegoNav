@@ -11,6 +11,7 @@ from kivy.properties import ListProperty
 from kivy.graphics import Color, Line, Rectangle, Ellipse
 
 import util
+from back.board import Board as BackBoard
 from back.tree import Leaf as BackLeaf
 
 
@@ -52,12 +53,13 @@ class Board(GridLayout, util.Helper):
     def getButtonByCoord(self, coord:list[int]) -> BoardButton:
         return self.buttons[str(coord)]
 
-    def resetBoard(self, stones:dict[list[list]]) -> None:
+    def resetBoard(self, stones:dict[list[list]], include_back_board:bool=True) -> None:
         all_coords = [[i // self.cols, i % self.cols] for i in range(self.cols ** 2)]
         for coord in all_coords:  self.buttons[str(coord)].setToNoStone()
         for color, coords in stones.items():
             for coord in coords:
                 self.buttons[str(coord)].setStoneColor(color)
+        if include_back_board:  self.data['back']['board'].resetBoard(stones)
 
 
 class BoardButton(ButtonBehavior, Widget, util.Helper):
@@ -145,6 +147,15 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
 
     def setStoneColor(self, color:str=None) -> None:
         if not color:  color = self.data['input']['board_options']['cur_stone']
+
+        self.cur_stone = color
+
+        """
+        NOTES:
+        - Currently working on the 'cur_stone' attr of the BoardButton.  It doesn't seem to be
+        working properly.
+        """
+
         self.stone_color.rgba = util.CLR_BLACK if color in ['b', 'black'] else util.CLR_WHITE
         self.stone_line_color.rgba = util.CLR_BLACK
 
@@ -164,35 +175,120 @@ class BoardButton(ButtonBehavior, Widget, util.Helper):
         add_leaf_kwargs['leaf_kwargs']['board_pos'][stone_color] += [self.coord]
         return add_leaf_kwargs
 
+
+
+
+
     def on_release(self) -> None:
-        if self.cur_stone == 'no':
-            cur_back_leaf_i = self.data['input']['tree_options']['cur_back_leaf_i']
-            back_leaves = self.data['back']['tree'].leaves
-            cur_back_leaf = back_leaves[cur_back_leaf_i]
-            # determine if this position has already been selected, if so, find its leaf and ui select it
-            if self.coord in [back_leaves[c].stone_pos for c in cur_back_leaf.children]:
-                selected_back_leaf = None
-                for c in back_leaf.children:
-                    if self.coord == back_leaves[c].stone_pos:
-                        selected_back_leaf = back_leaves[c]
-                        break
-                front_leaf = self.app.main_window.main_scroll.main_scroll_layout.tree.leaves[selected_back_leaf.front_leaf_i]
-                front_leaf.on_release()
-            else:
-                # get current backend leaf
-                cur_back_leaf = self.data['back']['tree'].leaves[self.data['input']['tree_options']['cur_back_leaf_i']]
-                # update 'main' 'data' (after previously collecting 'main' 'data')
-                self.data['input']['tree_options']['cur_back_leaf_i'] = self.data['back']['tree'].next_leaf
-                # update current backend leaf
-                cur_back_leaf.is_cur_board = False
-                # update backend tree with addLeaf()
-                self.data['back']['tree'].addLeaf(**self.getBackTreeAddLeafKwargs(cur_back_leaf))
-                # refresh frontend tree layout
-                self.parent.parent.tree.refreshLayout()
-                self.setStoneColor()
-            if self.data['input']['board_options']['next_stone_state'] == 'alternate':
-                self.cycleCurNextStoneButtons()
-        elif self.cur_stone == self.data['input']['board_options']['cur_stone']:
+        if self.data['input']['mode'] == 'navigate':  self.handleNavigateInputMode()
+        elif self.data['input']['mode'] == 'edit':  self.handleEditInputMode()
+
+    def handleNavigateInputMode(self) -> None:
+            """  """
+
+            """
+            
+            2023-05-27
+            
+            TURNOVER NOTES:
+            
+            - I THINK!!!  I have all the current levels of board and leaf input taken care of.  Next
+            to do is test:
+                
+                - Any board button can be pressed and there should be an expected response.
+                    
+                    - If the button pos currently has a stone, nothing happens.
+                    
+                    - If the button pos currently has no stone...
+                        
+                        - If the button pos has already been played as a current child, the board
+                        will be automatically updated to the whole board position of that selected
+                        child.
+                        
+                        - If the button pos has not already been played as a current child, then
+                        create a new leaf, update tree, etc.
+            
+                - Any leaf button can be pressed and there should be an expected response.
+                    
+                    - All 'stone' and 'root' leaves will give the same response when pressed:  The
+                    board will be updated to the represented board pos of that leaf.
+            
+            """
+
+            # print(f"\n{self.cur_stone = }\n")
+
+            # log = f"{NAME}: BoardButton '{self.coord}' on_release()"
+
+            if self.cur_stone == 'no':
+
+                cur_back_leaf_i = self.data['input']['tree_options']['cur_back_leaf_i']
+                back_leaves = self.data['back']['tree'].leaves
+                cur_back_leaf = back_leaves[cur_back_leaf_i]
+
+                # determine if this position has already been selected, if so, find its leaf and ui select it
+                if self.coord in [back_leaves[c].stone_pos for c in cur_back_leaf.children]:
+
+                    selected_back_leaf = None
+                    for c in cur_back_leaf.children:
+                        if self.coord == back_leaves[c].stone_pos:
+                            selected_back_leaf = back_leaves[c]
+                            break
+                    front_leaf = self.app.main_window.main_scroll.main_scroll_layout.tree.leaves[selected_back_leaf.front_leaf_i]
+                    front_leaf.on_release()
+
+                else:
+
+                    """
+                    check to see if this is a legal move using the back board
+                    """
+
+                    is_legal, reason = self.data['back']['board'].play(
+                        'b' if cur_back_leaf.stone_color == 'w' else 'w', self.coord, only_test_legality=True
+                    )
+                    # print(f"\n{is_legal = }\n")
+
+                    if not is_legal:
+
+                        Logger.info(f"{NAME}: BoardButton '{self.coord}' on_release() = 'illegal move - {reason}'")
+
+                    else:
+
+                        # get current backend leaf
+                        cur_back_leaf = self.data['back']['tree'].leaves[self.data['input']['tree_options']['cur_back_leaf_i']]
+                        # update 'main' 'data' (after previously collecting 'main' 'data')
+                        self.data['input']['tree_options']['cur_back_leaf_i'] = self.data['back']['tree'].next_leaf
+                        # update current backend leaf
+                        cur_back_leaf.is_cur_board = False
+                        # update backend tree with addLeaf()
+                        self.data['back']['tree'].addLeaf(**self.getBackTreeAddLeafKwargs(cur_back_leaf))
+                        # refresh frontend tree layout
+                        self.parent.parent.tree.refreshLayout()
+
+                        self.setStoneColor()
+
+                        cur_stone = self.data['input']['board_options']['cur_stone'][0]
+                        # print(f"\n{cur_stone = }\n")
+
+                        self.data['back']['board'].play(cur_stone, self.coord)
+
+                        self.cycleCurNextStoneButtons()
+
+            # if self.cur_stone == 'no':
+            #     if self.data['input']['board_options']['next_stone_state'] == 'alternate':
+            #         self.cycleCurNextStoneButtons()
+            # elif self.cur_stone == self.data['input']['board_options']['cur_stone']:
+            #     self.setToNoStone()
+            # else:
+            #     self.setStoneColor()
+            #     if self.data['input']['board_options']['next_stone_state'] == 'alternate':
+            #         self.cycleCurNextStoneButtons()
+
+
+
+
+
+    def handleEditInputMode(self) -> None:
+        if self.cur_stone == self.data['input']['board_options']['cur_stone']:
             self.setToNoStone()
         else:
             self.setStoneColor()

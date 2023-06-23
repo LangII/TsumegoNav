@@ -28,34 +28,44 @@ the paths and solving the problems oneself; second, the solutions are copyrighte
 
 
 """
-TURNOVER NOTES:
+NOTES FOR RETURNING FROM BREAK:
 
-2023-03-17
-- Next to do is make a board.  Review board from GoCalc for references...  Good luck!
+- Previous tasks were building the Tree (front and back), and creating it's connectivity between
+the Board.
 
-2023-05-11
+- Plans for next TO-DOS:
 
-- Doing very good at building Front Tree and making it interactive with Front Board, Back Board, and
-Back Tree.  "Doing very good", yes functional, but still very dirty.  Need to clean!
-
-DONE
-- Next is make it so user can click on Leaves in Front Tree and have the Front Board update to the
-board position of the Front Tree Leaf clicked on.
-DONE
-
-- Then update Front Board so a Symbol appears on Stone of 'stone_pos' of Front Tree Cur Leaf.  Be
-sure to make Symbol dynamic.
-
-IN REVIEW / CLEAN UP
-- Also need to make it so that if on a Leaf that already has children leaves, the user can click
-on a Front Board position that is already a child, and the Front Board and Front Tree, instead of
-creating a new Leaf, will just take the user to Leaf of clicked board position.
-IN REVIEW / CLEAN UP
-
-2023-05-22
-
-- Implement the use of back board for illegal moves.
+    - When selecting a Stone on the Board, reset the Tree to have it's current Leaf be the Leaf
+    that has the selected Stone's coordinates as it's stone_pos.    
+        - Will require alternative logic for when the User selects a Stone from the Root pos.
+        
+    - Add marks or symbols to Board Buttons.
+        - Include auto adjustments in color / outline for if Button has white, black or no Stone.
+        - Build this feature with scalability in mind.  Make it so that adding marks in the future
+        is easy.
+        
+    - With Board button marks ^, add marks:
+        - Add mark for current Leaf's stone_pos.
+        - Add mark for current Leaf's siblings.
+    
+    - Start thinking about more new UI work, like:
+        - Make the scale of the Board adjustable/resizeable.  As in keep the size of the widgets
+        window, but make it so that it only displays the top-left 12x12 of the board, not the whole
+        19x19.
+        - Make it so user can grab the Tree window, and drag/pan the tree around to look at
+        different parts of Tree.
+        - Make it so user can adjust size of Stones in Tree.
 """
+
+
+"""
+TURNOVER NOTES:
+- Looks like I'm all done with adding features and doing fixes.  All that's left to do before the
+break is clean up all the code...  Yeah...  \_(**)_/
+"""
+
+
+####################################################################################################
 
 
 import json
@@ -94,6 +104,12 @@ DATA = {
         },
     },
     'input': {
+
+        # UNDER CONSTRUCTION:
+        # This option is not yet available for user to update.  It's 2 options are handled if
+        # updated.  Though more improvements will be needed before complete.
+        'mode': 'navigate',  # 'edit' or 'navigate'
+
         'cur_problem': {
             'b': [[2, 2], [2, 3], [2, 4], [2, 5], [1, 7], ],
             'w': [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5], ]
@@ -105,7 +121,6 @@ DATA = {
         },
         'tree_options': {
             'cur_back_leaf_i': 0,
-            # 'cur_front_leaf_i': 0,
         },
     },
     'back': {
@@ -155,61 +170,22 @@ class MainApp(App):
     def keyboardInput(self, obj:WindowSDL, num1:int, num2:int, text:str, *args) -> None:
         Logger.info(f"{NAME}: keyboardInput text = '{text}'")
         if text == ' ':  self.spaceBarInput()
-        if text in ['w', 'a', 's', 'd']:  self.wasdInput(text)
 
     def spaceBarInput(self) -> None:
+
         print("")
         print(f"{Window.mouse_pos = }")
-
-        # var1 = self.main_window.main_scroll.main_scroll_layout.tree.tree_scroll.viewport_size
-        # var2 = self.main_window.main_scroll.main_scroll_layout.tree.tree_layout.size
         print("")
-        # print(f"{self.data['back']['tree'].tree = }")
-        # print(f"{self.data['back']['tree'].leaves[1].stone_pos = }")
-        # print(f"{var2 = }")
-        self.data['back']['tree'].printLeaves()
-        # self.data['back']['tree'].printTree()
-        # front_tree_leaves = self.main_window.main_scroll.main_scroll_layout.tree.leaves
-        # print(f"{front_tree_leaves = }")
 
-    def wasdInput(self, key:str) -> None:
+        back_tree = self.data['back']['tree']
+        back_tree.printLeaves()
+        back_tree.printTree('json')
 
-        if key == 'a':
+        back_board = self.data['back']['board']
+        # back_board.printVars()
+        back_board.printBoard()
 
-            cur_leaf_i = self.data['input']['tree_options']['cur_back_leaf_i']
-            if cur_leaf_i == 0:  return
-            back_tree = self.data['back']['tree']
-            front_board = self.main_window.main_scroll.main_scroll_layout.board
-            cur_parent_leaf = back_tree.leaves[back_tree.leaves[cur_leaf_i].parent_leaf_i]
-
-            front_board.resetBoard(cur_parent_leaf.board_pos)
-
-            back_tree.leaves[cur_leaf_i].is_cur_board = False
-            cur_parent_leaf.is_cur_board = True
-            self.main_window.main_scroll.main_scroll_layout.tree.refreshLayout()
-
-            self.data['input']['tree_options']['cur_back_leaf_i'] = cur_parent_leaf.back_leaf_i
-
-            self.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.cur_stone_button.cycleColor()
-            self.main_window.main_scroll.main_scroll_layout.board_options.cur_next_stone_options.next_stone_button.cycleColor()
-
-        elif key == 's':
-
-            cur_leaf_i = self.data['input']['tree_options']['cur_back_leaf_i']
-            if cur_leaf_i == 0:  return
-            back_tree = self.data['back']['tree']
-            front_board = self.main_window.main_scroll.main_scroll_layout.board
-            cur_parent_leaf = back_tree.leaves[back_tree.leaves[cur_leaf_i].parent_leaf_i]
-
-            cur_sibling_pos = cur_parent_leaf.children.index(cur_leaf_i)
-            next_sibling_i = 0 if cur_sibling_pos == len(cur_parent_leaf.children) - 1 else cur_sibling_pos + 1
-
-            next_leaf_i = cur_parent_leaf.children[next_sibling_i]
-            next_leaf = back_tree.leaves[next_leaf_i]
-
-            front_board.resetBoard(next_leaf.board_pos)
-
-            self.data['input']['tree_options']['cur_back_leaf_i'] = next_leaf.back_leaf_i
+        print("")
 
     #####  /\  IN APP TESTING
 
@@ -237,7 +213,6 @@ class MainWindow(BoxLayout, util.Helper):
         # self.data['back']['board'].resetBoard(presets)
 
         ##### /\  SETUP TESTING
-
 
 
 class MainScroll(ScrollView, util.Helper):

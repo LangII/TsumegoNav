@@ -44,8 +44,12 @@ class Tree(util.Helper):
     def __init__(self):
         super(Tree, self).__init__()
         Logger.info(f"{NAME}: init Tree")
-        if self.data:  board_pos = self.data['back']['board'].stones
-        else:  board_pos = None
+
+        # if self.data and 'board' in self.data['back']:  board_pos = self.data['back']['board'].stones
+        # else:  board_pos = None
+
+        board_pos = self.data['input']['cur_problem'] if self.data else None
+
         self.leaves = [Leaf(self, is_root=True, is_cur_board=True, back_leaf_i=0, board_pos=board_pos)]
         self.next_leaf = 1
         self.tree = {0: {}}
@@ -56,7 +60,14 @@ class Tree(util.Helper):
         for leaf in path_to_parent:  cur_leaf = cur_leaf[leaf]
         cur_leaf[self.next_leaf] = {}
         leaf_kwargs['back_leaf_i'] = self.next_leaf
-        self.leaves += [Leaf(self, **leaf_kwargs)]
+
+        new_leaf = Leaf(self, **leaf_kwargs)
+        self.leaves += [new_leaf]
+        # print("\nDOES THIS FUCKING THING HAPPEN!?!?!?!?!\n")
+        self.leaves[new_leaf.parent_leaf_i].setChildrenSiblingI()
+
+        # Leaf(self, **leaf_kwargs)
+
         self.next_leaf += 1
         self.refreshFrontTreeMap()
 
@@ -106,9 +117,9 @@ class Tree(util.Helper):
             print(f"path_to_self   = {leaf.path_to_self}")
             print(f"sibling_i      = {leaf.sibling_i}")
 
-    def printTree(self) -> None:
-        print(f"\n{self.tree = }")
-        # print(json.loads(self.tree, indent=4))
+    def printTree(self, type:str='flat') -> None:
+        if type == 'flat':  print(f"\n{self.tree = }")
+        elif type == 'json':  print(f"\nself.tree = {json.dumps(self.tree, indent=4, default=str)}")
 
     def refreshFrontTreeMap(self) -> None:
         # recursively flatten tree
@@ -195,6 +206,9 @@ class Leaf(util.Helper):
         self.ko = ko
         self.captures = captures
         self.children = []
+
+        self.sibling_i = []
+
         if self.is_root:
             self.move_count = 0
             self.stone_color = 'w'
@@ -207,9 +221,32 @@ class Leaf(util.Helper):
             self.parent_leaf_i = parent_leaf_i
             self.path_to_parent = self.tree.leaves[self.parent_leaf_i].path_to_self
             self.path_to_self = self.path_to_parent + [self.back_leaf_i]
-            self.sibling_i = len(self.tree.leaves[self.parent_leaf_i].children)
             # populate 'children' of parent leaf
+            # print("\nDOES THIS HAPPEN!?!?!?!?!?!?!\n")
             self.tree.leaves[self.parent_leaf_i].children += [self.back_leaf_i]
+
+            # self.setSiblingI()
+
+            # print(f"\n{self.parent_leaf_i = }\n")
+
+            # self.tree.leaves[self.parent_leaf_i].setChildrenSiblingI()
+
+        # self.tree.leaves += [self]
+
+    def setSiblingI(self) -> None:
+        self.sibling_i = [c for c in self.tree.leaves[self.parent_leaf_i].children if c != self.back_leaf_i]
+
+    def setChildrenSiblingI(self) -> None:
+
+        # print("\nHOW ABOUT THIS FUCKING THING!?!?!??!\n")
+
+        for child_i in self.children:
+
+            # print(f"\n{child_i = }\n")
+            # print(f"\n{self.tree.leaves = }\n")
+            # print(f"\n{vars(self.tree.leaves[0]) = }\n")
+
+            self.tree.leaves[child_i].setSiblingI()
 
 
 ####################################################################################################
