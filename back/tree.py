@@ -44,12 +44,7 @@ class Tree(util.Helper):
     def __init__(self):
         super(Tree, self).__init__()
         Logger.info(f"{NAME}: init Tree")
-
-        # if self.data and 'board' in self.data['back']:  board_pos = self.data['back']['board'].stones
-        # else:  board_pos = None
-
         board_pos = self.data['input']['cur_problem'] if self.data else None
-
         self.leaves = [Leaf(self, is_root=True, is_cur_board=True, back_leaf_i=0, board_pos=board_pos)]
         self.next_leaf = 1
         self.tree = {0: {}}
@@ -60,14 +55,9 @@ class Tree(util.Helper):
         for leaf in path_to_parent:  cur_leaf = cur_leaf[leaf]
         cur_leaf[self.next_leaf] = {}
         leaf_kwargs['back_leaf_i'] = self.next_leaf
-
         new_leaf = Leaf(self, **leaf_kwargs)
         self.leaves += [new_leaf]
-        # print("\nDOES THIS FUCKING THING HAPPEN!?!?!?!?!\n")
         self.leaves[new_leaf.parent_leaf_i].setChildrenSiblingI()
-
-        # Leaf(self, **leaf_kwargs)
-
         self.next_leaf += 1
         self.refreshFrontTreeMap()
 
@@ -98,28 +88,7 @@ class Tree(util.Helper):
         cur_leaf_2 = self.tree
         for leaf in path_to_parent[:-1]:  cur_leaf_2 = cur_leaf_2[leaf]
         cur_leaf_2[path_to_parent[-1]] = {k: cur_leaf[k] for k in new_keys}
-
         self.refreshFrontTreeMap()
-
-    def printLeaves(self) -> None:
-        for leaf in self.leaves:
-            print(f"\nis_root        = {leaf.is_root}")
-            print(f"back_leaf_i    = {leaf.back_leaf_i}")
-            print(f"front_leaf_i   = {leaf.front_leaf_i}")
-            print(f"parent_leaf_i  = {leaf.parent_leaf_i}")
-            print(f"is_cur_board   = {leaf.is_cur_board}")
-            print(f"move_count     = {leaf.move_count}")
-            print(f"stone_color    = {leaf.stone_color}")
-            print(f"stone_pos      = {leaf.stone_pos}")
-            print(f"board_pos      = {leaf.board_pos}")
-            print(f"children       = {leaf.children}")
-            print(f"path_to_parent = {leaf.path_to_parent}")
-            print(f"path_to_self   = {leaf.path_to_self}")
-            print(f"sibling_i      = {leaf.sibling_i}")
-
-    def printTree(self, type:str='flat') -> None:
-        if type == 'flat':  print(f"\n{self.tree = }")
-        elif type == 'json':  print(f"\nself.tree = {json.dumps(self.tree, indent=4, default=str)}")
 
     def refreshFrontTreeMap(self) -> None:
         # recursively flatten tree
@@ -161,6 +130,31 @@ class Tree(util.Helper):
                 elif new_value == ' ':  update = '|'
                 self.front_tree_map[new_y][x] = update
 
+    def updateLeavesIsCurBoard(self, new_is_cur_board_leaf_i:int) -> None:
+        for leaf in self.leaves:
+            if leaf.is_cur_board:  leaf.is_cur_board = False  ;  break
+        self.leaves[new_is_cur_board_leaf_i].is_cur_board = True
+
+    def printLeaves(self) -> None:
+        for leaf in self.leaves:
+            print(f"\nis_root        = {leaf.is_root}")
+            print(f"back_leaf_i    = {leaf.back_leaf_i}")
+            print(f"front_leaf_i   = {leaf.front_leaf_i}")
+            print(f"parent_leaf_i  = {leaf.parent_leaf_i}")
+            print(f"is_cur_board   = {leaf.is_cur_board}")
+            print(f"move_count     = {leaf.move_count}")
+            print(f"stone_color    = {leaf.stone_color}")
+            print(f"stone_pos      = {leaf.stone_pos}")
+            print(f"board_pos      = {leaf.board_pos}")
+            print(f"children       = {leaf.children}")
+            print(f"path_to_parent = {leaf.path_to_parent}")
+            print(f"path_to_self   = {leaf.path_to_self}")
+            print(f"sibling_i      = {leaf.sibling_i}")
+
+    def printTree(self, type:str='flat') -> None:
+        if type == 'flat':  print(f"\n{self.tree = }")
+        elif type == 'json':  print(f"\nself.tree = {json.dumps(self.tree, indent=4, default=str)}")
+
     def printFrontTreeMap(self) -> None:
         if not self.front_tree_map:  print("\nself.front_tree_map = []")  ;  return
         pad = len(str(max([x if type(x) == int else 0 for x in sum(self.front_tree_map, [])])))
@@ -168,11 +162,6 @@ class Tree(util.Helper):
         print("\nself.front_tree_map = [")
         for row in front_tree_map:  print(f"\t{' '.join(row)}")
         print("]")
-
-    def updateLeavesIsCurBoard(self, new_is_cur_board_leaf_i:int) -> None:
-        for leaf in self.leaves:
-            if leaf.is_cur_board:  leaf.is_cur_board = False  ;  break
-        self.leaves[new_is_cur_board_leaf_i].is_cur_board = True
 
 
 class Leaf(util.Helper):
@@ -206,9 +195,7 @@ class Leaf(util.Helper):
         self.ko = ko
         self.captures = captures
         self.children = []
-
         self.sibling_i = []
-
         if self.is_root:
             self.move_count = 0
             self.stone_color = 'w'
@@ -221,32 +208,13 @@ class Leaf(util.Helper):
             self.parent_leaf_i = parent_leaf_i
             self.path_to_parent = self.tree.leaves[self.parent_leaf_i].path_to_self
             self.path_to_self = self.path_to_parent + [self.back_leaf_i]
-            # populate 'children' of parent leaf
-            # print("\nDOES THIS HAPPEN!?!?!?!?!?!?!\n")
             self.tree.leaves[self.parent_leaf_i].children += [self.back_leaf_i]
-
-            # self.setSiblingI()
-
-            # print(f"\n{self.parent_leaf_i = }\n")
-
-            # self.tree.leaves[self.parent_leaf_i].setChildrenSiblingI()
-
-        # self.tree.leaves += [self]
 
     def setSiblingI(self) -> None:
         self.sibling_i = [c for c in self.tree.leaves[self.parent_leaf_i].children if c != self.back_leaf_i]
 
     def setChildrenSiblingI(self) -> None:
-
-        # print("\nHOW ABOUT THIS FUCKING THING!?!?!??!\n")
-
-        for child_i in self.children:
-
-            # print(f"\n{child_i = }\n")
-            # print(f"\n{self.tree.leaves = }\n")
-            # print(f"\n{vars(self.tree.leaves[0]) = }\n")
-
-            self.tree.leaves[child_i].setSiblingI()
+        for child_i in self.children:  self.tree.leaves[child_i].setSiblingI()
 
 
 ####################################################################################################

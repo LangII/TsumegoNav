@@ -54,14 +54,11 @@ the Board.
         19x19.
         - Make it so user can grab the Tree window, and drag/pan the tree around to look at
         different parts of Tree.
-        - Make it so user can adjust size of Stones in Tree.
-"""
-
-
-"""
-TURNOVER NOTES:
-- Looks like I'm all done with adding features and doing fixes.  All that's left to do before the
-break is clean up all the code...  Yeah...  \_(**)_/
+        - Create menu bars similar to BoardOptions.  Create TreeOptions and LeafOptions.
+            - TreeOptions:
+                - Make it so user can adjust size of Stones in Tree.
+            - LeafOptions:
+                - Create UI use of back_tree.moveLeaf().
 """
 
 

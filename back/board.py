@@ -132,11 +132,6 @@ class Board(util.Helper):
     def resetPlayData(self) -> None:
         for k in self.play_data.keys():  self.play_data[k] = None
 
-    # def kivyDeepCopyErrorWorkAround(self) -> dict:
-    #     attr_dict = vars(self)
-    #     del attr_dict['app']
-    #     print(f"\n{attr_dict = }\n")
-
     def playIsLegal(self) -> tuple[bool, str]:
         # play is illegal because another stone is currently at that coord
         if self.play_data['coord'] in self.stones['b'] + self.stones['w']:  return False, 'occupied'
@@ -147,19 +142,6 @@ class Board(util.Helper):
         del self.data ; del self.app
         self.play_data['temp_board'] = deepcopy(self)
         self.data, self.app = data, app
-
-        """
-        2023-05-26
-        TURNOVER NOTES:
-        
-        - Having an issue...  For some reason Kivy is throwing an odd error when using `deepcopy()`
-        on Kivy objects (or so it says).  I'm not 100% sure this is my problem because I just ^
-        removed the Kivy objects before deepcopy()-ing and I'm still having the same error.
-        
-            - 2nd thought...  Try removing (just comment out) all current/previous uses of
-            BackBoard.  Then start from scratch with BackBoard implementation.
-        """
-
         self.play_data['temp_board'].board[self.play_data['y']][self.play_data['x']] = self.play_data['char']
         self.play_data['temp_board'].setStones()
         self.play_data['temp_board'].setGroups()
