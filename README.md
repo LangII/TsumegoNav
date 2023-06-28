@@ -8,3 +8,4 @@ Initial development has been focused on basic controls of the Board, the Navigat
 
 Latest example clip (posted 2023-06-27):
 ![](example_01.gif)
+
